@@ -14,7 +14,7 @@ export async function setSetting(db, key, value) {
 
 // Players ordered by id, with public code attached. Includes email/token/photo: callers strip.
 export async function listPlayers(db) {
-  const { results } = await db.prepare('SELECT id, name, company, email, photo, token, created_at FROM players ORDER BY id').all();
+  const { results } = await db.prepare('SELECT id, name, company, email, photo, token, created_at, grp FROM players ORDER BY id').all();
   return results.map((p, i) => ({ ...p, code: codeFor(i) }));
 }
 
@@ -24,7 +24,7 @@ export async function listGames(db) {
 }
 
 export function publicPlayer(p) {
-  return { id: p.id, code: p.code, name: p.name, company: p.company, hasPhoto: !!p.photo };
+  return { id: p.id, code: p.code, name: p.name, company: p.company, grp: p.grp || null, hasPhoto: !!p.photo };
 }
 
 export function publicGame(g) {

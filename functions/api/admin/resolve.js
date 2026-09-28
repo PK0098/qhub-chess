@@ -10,7 +10,7 @@ export const onRequestPost = handle(async ({ request, env }) => {
   if (!['1-0', '0-1', '1/2'].includes(body.result)) throw bad('Result must be 1-0, 0-1 or 1/2');
   const g = await db.prepare('SELECT * FROM games WHERE id = ?').bind(Number(body.g)).first();
   if (!g) throw bad('Unknown game', 404);
-  if (g.p2 === null) throw bad('Byes cannot be changed', 400);
+  if (body.result === '1/2' && g.round >= 2) throw bad('No draws in the knockout: play again until someone wins', 400);
   await db.prepare("UPDATE games SET result = ?, status = 'confirmed', confirmed_at = ? WHERE id = ?").bind(body.result, nowIso(), g.id).run();
   if (body.notify !== false) {
     const byId = new Map((await listPlayers(db)).map((p) => [p.id, p]));

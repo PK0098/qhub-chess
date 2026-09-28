@@ -1,6 +1,6 @@
 import { json, handle } from '../_lib/http.js';
 import { getSetting, listPlayers, listGames, publicPlayer, publicGame } from '../_lib/db.js';
-import { sweep } from '../_lib/sweep.js';
+import { sweep, groupTables } from '../_lib/sweep.js';
 
 export const onRequestGet = handle(async ({ env }) => {
   const db = env.DB;
@@ -12,12 +12,12 @@ export const onRequestGet = handle(async ({ env }) => {
     listPlayers(db),
     listGames(db),
   ]);
+  const groups = format === 'groups' ? await groupTables(db, players, games) : null;
   return json({
-    phase, format,
+    phase, format, groups,
     champion: champion ? Number(champion) : null,
     closeDate: env.CLOSE_DATE,
     startDate: env.START_DATE,
-    knockoutFrom: Number(env.KNOCKOUT_FROM || 12),
     confirmHours: Number(env.CONFIRM_HOURS || 48),
     players: players.map(publicPlayer),
     games: games.map(publicGame),

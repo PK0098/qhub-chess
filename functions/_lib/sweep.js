@@ -1,9 +1,11 @@
-import { koNextRound } from './tournament.js';
+import { groupTable, semiPairings, finalPairings, winnerOf } from './tournament.js';
 import { getSetting, setSetting, listGames, listPlayers, nowIso } from './db.js';
 import { sendMail, templates } from './mail.js';
 
-// Auto-confirm stale reports, then (knockout) create the next round when a
-// round is complete, emailing the advancing players. Safe to call on every request.
+// Auto-confirm stale reports, then create the next stage (semis, final +
+// third place) when the previous one is complete, emailing the players
+// involved. Safe to call on every request: every step checks the database
+// before inserting.
 export async function sweep(db, env) {
   const hours = Number(env.CONFIRM_HOURS || 48);
   const cutoff = new Date(Date.now() - hours * 3600 * 1000).toISOString();
@@ -12,58 +14,76 @@ export async function sweep(db, env) {
 
   const format = await getSetting(db, 'format');
   const phase = await getSetting(db, 'phase');
-  if (format !== 'ko' || phase !== 'play') return { advanced: [] };
-  return advanceKnockout(db, env);
+  if (format !== 'groups' || phase !== 'play') return { advanced: [] };
+  return advanceGroups(db, env);
 }
 
-export async function advanceKnockout(db, env) {
-  const games = await listGames(db);
-  if (!games.length) return { advanced: [] };
-  const lastRound = Math.max(...games.map((g) => g.round));
-  const cur = games.filter((g) => g.round === lastRound);
+// Ordered tables for both groups, from the players' grp column.
+export async function groupTables(db, players, games) {
+  const lots = JSON.parse((await getSetting(db, 'lots')) || '[]');
+  const ids = (g) => players.filter((p) => p.grp === g).map((p) => p.id);
+  return { A: groupTable(ids('A'), games, lots), B: groupTable(ids('B'), games, lots) };
+}
 
-  // Final decided?
-  if (cur.length === 1 && cur[0].status === 'confirmed' && cur[0].p2 !== null) {
-    const winner = cur[0].result === '1-0' ? cur[0].p1 : cur[0].result === '0-1' ? cur[0].p2 : null;
-    if (winner) {
-      await setSetting(db, 'champion', winner);
-      await setSetting(db, 'phase', 'done');
-      const players = await listPlayers(db);
-      const champ = players.find((p) => p.id === winner);
-      const t = templates.champion(env, { champion: champ });
-      await Promise.all(players.map((p) => sendMail(env, { to: p.email, ...t })));
-    }
-    return { advanced: [] };
+export async function advanceGroups(db, env) {
+  const games = await listGames(db);
+  const players = await listPlayers(db);
+  const round = (r) => games.filter((g) => g.round === r);
+  const allConfirmed = (list) => list.length > 0 && list.every((g) => g.status === 'confirmed');
+  const ins = db.prepare('INSERT INTO games (round, slot, p1, p2, status) VALUES (?, ?, ?, ?, ?)');
+
+  // 1. Group stage complete → semis.
+  if (round(2).length === 0) {
+    if (!allConfirmed(round(1))) return { advanced: [] };
+    const tables = await groupTables(db, players, games);
+    const semis = semiPairings(tables.A, tables.B);
+    await db.batch(semis.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
+    const created = (await listGames(db)).filter((g) => g.round === 2);
+    await emailPairings(db, env, created, 'semi');
+    return { advanced: created };
   }
 
-  const next = koNextRound(games, lastRound);
-  if (!next) return { advanced: [] };
+  // 2. Semis complete → final and third place.
+  if (round(3).length === 0) {
+    const next = finalPairings(round(2));
+    if (!next) return { advanced: [] };
+    await db.batch(next.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
+    const created = (await listGames(db)).filter((g) => g.round === 3);
+    await emailPairings(db, env, created.filter((g) => g.slot === 0), 'final');
+    await emailPairings(db, env, created.filter((g) => g.slot === 1), 'third');
+    return { advanced: created };
+  }
 
-  const stmt = db.prepare('INSERT INTO games (round, slot, p1, p2, status) VALUES (?, ?, ?, ?, ?)');
-  await db.batch(next.map((g) => stmt.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
-  const created = (await listGames(db)).filter((g) => g.round === lastRound + 1);
-  await emailPairings(db, env, created, 'ko', true);
-  return { advanced: created };
+  // 3. Final decided → champion. 4. Both round-3 games decided → done.
+  const final = round(3).find((g) => g.slot === 0);
+  const champion = winnerOf(final);
+  if (champion && !(await getSetting(db, 'champion'))) {
+    await setSetting(db, 'champion', champion);
+    const champ = players.find((p) => p.id === champion);
+    const t = templates.champion(env, { champion: champ });
+    await Promise.all(players.map((p) => sendMail(env, { to: p.email, ...t })));
+  }
+  if (allConfirmed(round(3))) await setSetting(db, 'phase', 'done');
+  return { advanced: [] };
 }
 
 // One email per player listing their games in `games`.
-export async function emailPairings(db, env, games, format, isNextRound) {
+// stage: 'group' | 'semi' | 'final' | 'third'.
+export async function emailPairings(db, env, games, stage) {
   const players = await listPlayers(db);
   const byId = new Map(players.map((p) => [p.id, p]));
-  const round = games.length ? games[0].round : 1;
   const perPlayer = new Map();
   for (const g of games) {
     for (const [me, other] of [[g.p1, g.p2], [g.p2, g.p1]]) {
-      if (me === null || me === undefined) continue;
-      const opp = other === null || other === undefined ? null : byId.get(other);
+      const opp = byId.get(other);
       if (!perPlayer.has(me)) perPlayer.set(me, []);
-      perPlayer.get(me).push({ id: g.id, opponent: opp ? { name: opp.name, company: opp.company, email: opp.email } : null });
+      perPlayer.get(me).push({ id: g.id, opponent: { name: opp.name, company: opp.company, email: opp.email } });
     }
   }
   await Promise.all([...perPlayer.entries()].map(([id, list]) => {
     const player = byId.get(id);
     if (!player) return null;
-    const t = templates.pairings(env, { player, format, round, games: list, isNextRound });
+    const t = templates.pairings(env, { player, stage, games: list });
     return sendMail(env, { to: player.email, ...t });
   }));
 }

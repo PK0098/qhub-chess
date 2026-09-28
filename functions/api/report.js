@@ -14,8 +14,7 @@ export const onRequestPost = handle(async ({ request, env }) => {
   if (g.status === 'confirmed') throw bad('This result is already confirmed', 409);
   if (g.status === 'disputed') throw bad('This game is disputed; the organizer will settle it', 409);
   if (g.status === 'reported' && g.reported_by !== me.id) throw bad('Your opponent already reported; please confirm or dispute instead', 409);
-  const format = await getSetting(db, 'format');
-  if (body.result === 'draw' && format === 'ko') throw bad('No draws in the knockout: play again until someone wins', 400);
+  if (body.result === 'draw' && g.round >= 2) throw bad('No draws in the knockout: play again until someone wins', 400);
   let result;
   try { result = toP1Result(g.p1 === me.id ? 'p1' : 'p2', body.result); } catch { throw bad('Result must be win, loss or draw', 400); }
 

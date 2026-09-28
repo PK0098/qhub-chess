@@ -16,7 +16,7 @@ export const onRequestGet = handle(async ({ request, env }) => {
     const opp = oppId === null ? null : byId.get(oppId);
     const active = phase === 'play';
     return {
-      id: g.id, round: g.round, youAre, result: g.result, status: g.status,
+      id: g.id, round: g.round, slot: g.slot, youAre, result: g.result, status: g.status,
       opponent: opp ? publicPlayer(opp) : null,
       reportedByYou: g.reported_by === me.id,
       canReport: active && opp !== null && (g.status === 'pending' || (g.status === 'reported' && g.reported_by === me.id)),

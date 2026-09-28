@@ -1,8 +1,15 @@
 // Email via Resend. Never throws: callers must not fail a request because mail failed.
 
+// Without a Resend key (local dev) the email is captured in the `outbox` table
+// instead, so the whole flow can be read on the admin page.
 export async function sendMail(env, { to, subject, html, text, replyTo }) {
-  if (!env.RESEND_API_KEY) { console.error('RESEND_API_KEY missing'); return { ok: false, error: 'no api key' }; }
   const footerText = '\n\nMade by Pouya · Questions: chess@pouyakarimi.com';
+  if (!env.RESEND_API_KEY) {
+    if (!env.DB) { console.error('RESEND_API_KEY missing'); return { ok: false, error: 'no api key' }; }
+    await env.DB.prepare('INSERT INTO outbox (to_addr, subject, html, text, created_at) VALUES (?, ?, ?, ?, ?)')
+      .bind([].concat(to).join(', '), subject, html, text ? text + footerText : null, new Date().toISOString()).run();
+    return { ok: true, outbox: true };
+  }
   const body = { from: env.MAIL_FROM, to: Array.isArray(to) ? to : [to], subject, html, text: text ? text + footerText : undefined };
   if (replyTo) body.reply_to = replyTo;
   try {
@@ -52,7 +59,8 @@ export const templates = {
       subject: `You're on the board, ${first(player.name)} (${player.code})`,
       html: layout(`You're on the board, ${esc(first(player.name))}.`, `
         <p>Your card is <strong>${esc(player.code)}</strong>: ${esc(player.name)}, ${esc(player.company)}.</p>
-        <p>Registration closes <strong>${fmtDate(env.CLOSE_DATE)}</strong>. Games start <strong>${fmtDate(env.START_DATE)}</strong>. Once the field is set you'll get one email with your opponent(s) and their email address, so you can arrange a time together.</p>
+        <p>Registration closes <strong>${fmtDate(env.CLOSE_DATE)}</strong>. Games start <strong>${fmtDate(env.START_DATE)}</strong>.</p>
+        <p>The format: everyone is drawn at random into two groups. You play everyone in your group once (win 3, draw 1, loss 0). The top two of each group go to the semi-finals, then there's a final. Once the field is set you'll get one email with your group opponents and their email addresses, so you can arrange times together.</p>
         <p>Every game: 10 minutes each, no increment. Standard rules. Be nice. Chess sets are in the kitchens on floors 4 and 5.</p>
         ${button(url, 'Your player page')}
         <p style="font-size:12px;color:#5c5548">Keep this email. The link above is personal and is how you report results.</p>`),
@@ -60,31 +68,56 @@ export const templates = {
     };
   },
 
-  // games: [{id, opponent:{name,company,email} | null}]
-  pairings(env, { player, format, round, games, isNextRound }) {
-    const fmt = format === 'ko' ? 'knockout bracket' : 'round robin league';
-    const rows = games.map((g) => g.opponent
-      ? `<li style="margin:8px 0">${opponentLine(g.opponent)}<br><a href="${esc(gameLink(env, player.token, g.id))}" style="color:#2b3f6b">Report this result</a></li>`
-      : `<li style="margin:8px 0"><strong>Bye</strong> — you advance to the next round without playing.</li>`).join('');
-    const title = isNextRound ? `Round ${round}: your next opponent.` : `Pairings are out.`;
-    const intro = isNextRound
-      ? `<p>You won your last game. Here is round ${round}.</p>`
-      : `<p>Registration closed with enough players for a <strong>${fmt}</strong>. ${format === 'ko' ? 'Lose and you\'re out. Win and you get a new opponent by email.' : 'Play everyone once. Win 3, draw 1, loss 0.'}</p>`;
-    const replyTo = games.map((g) => g.opponent && g.opponent.email).filter(Boolean);
-    const onlyBye = games.length > 0 && games.every((g) => !g.opponent);
-    const howTo = onlyBye
-      ? `<p>You drew a bye this round, so there is nothing to arrange yet. When the other round ${round} games finish you'll get an email with your next opponent.</p>`
-      : `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets are in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0.</p>`;
-    const reporting = onlyBye ? '' : `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation.</p>`;
+  // stage: 'group' | 'semi' | 'final' | 'third'. games: [{id, opponent:{name,company,email}}]
+  pairings(env, { player, stage, games }) {
+    const rows = games.map((g) =>
+      `<li style="margin:8px 0">${opponentLine(g.opponent)}<br><a href="${esc(gameLink(env, player.token, g.id))}" style="color:#2b3f6b">Report this result</a></li>`).join('');
+    const stageName = { semi: 'Semi-final', final: 'The final', third: 'Third-place game' }[stage];
+    const title = stage === 'group' ? `Pairings are out. You're in group ${esc(player.grp)}.` : `${stageName}: your opponent.`;
+    const intro = {
+      group: `<p>Registration is closed. You're in <strong>group ${esc(player.grp)}</strong>. Play everyone in your group once: win 3, draw 1, loss 0. The top two of each group go to the semi-finals.</p>`,
+      semi: `<p>You finished in the top two of your group. The semi-final is one game: the winner plays the final, the loser plays for third place.</p>`,
+      final: `<p>You won your semi-final. One game for the title.</p>`,
+      third: `<p>You lost your semi-final, but bronze is still on the table. One game for third place.</p>`,
+    }[stage];
+    const replyTo = games.map((g) => g.opponent.email);
+    const howTo = `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets are in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0.</p>`;
+    const noDraw = stage === 'group' ? '' : `<p><strong>No draws from here on.</strong> If a game is drawn, play again until someone wins, then report that result.</p>`;
+    const reporting = `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation.</p>`;
     return {
-      subject: isNextRound ? `Round ${round}: your next opponent` : onlyBye ? `Pairings are out — you have a bye in round ${round}` : `Pairings are out — ${fmt}`,
+      subject: stage === 'group' ? `Pairings are out — you're in group ${player.grp}` : `${stageName}: your opponent`,
       replyTo: replyTo.length === 1 ? replyTo[0] : undefined,
       html: layout(title, `${intro}
         ${howTo}
         <ul style="padding-left:18px;margin:0">${rows}</ul>
+        ${noDraw}
         ${reporting}
         ${button(meLink(env, player.token), 'Your player page')}`),
-      text: `${title}\n${games.map((g) => g.opponent ? `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}` : '- Bye: you advance without playing').join('\n')}\nYour page: ${meLink(env, player.token)}`,
+      text: `${title}\n${games.map((g) => `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}`).join('\n')}${stage === 'group' ? '' : '\nNo draws: a drawn game is replayed until someone wins.'}\nYour page: ${meLink(env, player.token)}`,
+    };
+  },
+
+  // One-off announcement sent from the admin page to everyone already registered.
+  formatChange(env, { player }) {
+    return {
+      subject: `Format update: two groups, then a knockout`,
+      html: layout(`Format update.`, `
+        <p>Hi ${esc(first(player.name))}, thanks for signing up. One change: the format no longer depends on how many people register. It is now fixed, whatever the headcount:</p>
+        <ol style="padding-left:20px;margin:0 0 14px">
+          <li style="margin:6px 0">Everyone is drawn at random into <strong>two groups</strong>.</li>
+          <li style="margin:6px 0">You play everyone in your group once. Win 3, draw 1, loss 0.</li>
+          <li style="margin:6px 0">The <strong>top two</strong> of each group go to the semi-finals: group winners meet the other group's runner-up.</li>
+          <li style="margin:6px 0">Semi winners play the <strong>final</strong>; semi losers play for third place. No draws in the knockout: replay until someone wins.</li>
+        </ol>
+        <p>Nothing to do now. Registration still closes <strong>${fmtDate(env.CLOSE_DATE)}</strong> and your pairings arrive by email right after. Still 10 minutes each, no increment.</p>
+        ${button(env.SITE_URL, 'See the site')}`),
+      text: `Hi ${first(player.name)}, one change: the format is now fixed regardless of headcount.
+1. Everyone is drawn at random into two groups.
+2. You play everyone in your group once (3/1/0).
+3. Top two of each group go to the semi-finals (group winners vs the other group's runner-up).
+4. Semi winners play the final; semi losers play for third. No draws in the knockout.
+Nothing to do now. Registration closes ${fmtDate(env.CLOSE_DATE)}; pairings arrive by email after that.
+${env.SITE_URL}`,
     };
   },
 

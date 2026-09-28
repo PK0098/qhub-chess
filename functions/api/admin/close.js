@@ -1,6 +1,6 @@
 import { json, bad, handle, requireAdmin } from '../../_lib/http.js';
-import { getSetting, setSetting, listPlayers, listGames, nowIso } from '../../_lib/db.js';
-import { decideFormat, rrPairings, koBracket } from '../../_lib/tournament.js';
+import { getSetting, setSetting, listPlayers, listGames } from '../../_lib/db.js';
+import { splitGroups, groupPairings } from '../../_lib/tournament.js';
 import { emailPairings } from '../../_lib/sweep.js';
 
 export const onRequestPost = handle(async ({ request, env }) => {
@@ -8,20 +8,25 @@ export const onRequestPost = handle(async ({ request, env }) => {
   const db = env.DB;
   if ((await getSetting(db, 'phase')) !== 'registration') throw bad('Registration is already closed', 409);
   const players = await listPlayers(db);
-  if (players.length < 2) throw bad('Need at least 2 players', 400);
+  if (players.length < 4) throw bad('Need at least 4 players for two groups', 400);
 
-  const ids = players.map((p) => p.id);
-  const format = decideFormat(ids.length, Number(env.KNOCKOUT_FROM || 12));
-  const games = format === 'ko' ? koBracket(ids).games : rrPairings(ids);
+  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+  const { lots, A, B } = splitGroups(players.map((p) => p.id), seed);
+  const games = groupPairings(A, B);
 
-  const stmt = db.prepare('INSERT INTO games (round, slot, p1, p2, status, result, confirmed_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
-  await db.batch(games.map((g) => g.p2 === null
-    ? stmt.bind(g.round, g.slot, g.p1, null, 'confirmed', '1-0', nowIso())
-    : stmt.bind(g.round, g.slot, g.p1, g.p2, 'pending', null, null)));
-  await setSetting(db, 'format', format);
+  const setGrp = db.prepare('UPDATE players SET grp = ? WHERE id = ?');
+  const ins = db.prepare('INSERT INTO games (round, slot, p1, p2, status) VALUES (?, ?, ?, ?, ?)');
+  await db.batch([
+    ...A.map((id) => setGrp.bind('A', id)),
+    ...B.map((id) => setGrp.bind('B', id)),
+    ...games.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')),
+  ]);
+  await setSetting(db, 'format', 'groups');
+  await setSetting(db, 'seed', seed);
+  await setSetting(db, 'lots', JSON.stringify(lots));
   await setSetting(db, 'phase', 'play');
 
   const created = await listGames(db);
-  await emailPairings(db, env, created, format, false);
-  return json({ ok: true, format, players: ids.length, games: created.length });
+  await emailPairings(db, env, created, 'group');
+  return json({ ok: true, format: 'groups', players: players.length, groups: { A: A.length, B: B.length }, games: created.length });
 });
