@@ -426,4 +426,6 @@ tr.q .grank { background: var(--gacc); border-color: var(--ink); }
   .gtable th:last-child, .gtable td:last-child { padding-right: 10px; }
   .gplayer .avatar { display: none; }
   .gpanel-head { padding: 16px 14px; }
+  .gtable td.x { padding: 3px 1px; }
+  .xchip { width: 23px; height: 23px; font-size: 11px; }
 }
