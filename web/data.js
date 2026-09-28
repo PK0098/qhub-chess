@@ -15,11 +15,11 @@
     ['Levon Galstyan', 'Q hub', 'Knight before bishop. Always.'],
     ['Nare Simonyan', 'Freelance', 'Here for the vibes and the en passant.'],
   ];
-  const players = names.map(([name, company, tag], i) => ({ id: i + 1, code: 'P' + String(i + 1).padStart(2, '0'), name, company, tag, grp: i % 2 ? 'B' : 'A', hasPhoto: false }));
+  const players = names.map(([name, company, tag], i) => ({ id: i + 1, code: 'P' + String(i + 1).padStart(2, '0'), name, company, tag, grp: i % 2 ? 'A' : 'P', hasPhoto: false }));
   // Deterministic pseudo-random results for a group stage in progress.
   let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const games = []; let id = 1, slot = 0;
-  for (const grp of ['A', 'B']) {
+  for (const grp of ['P', 'A']) {
     const ids = players.filter((p) => p.grp === grp).map((p) => p.id);
     for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
       const r = rnd();
@@ -47,7 +47,7 @@
   window.MOCK_STATE = {
     phase: 'registration', format: 'groups', champion: null,
     closeDate: '2026-09-30T23:59:59+04:00', startDate: '2026-10-01', confirmHours: 48,
-    players, games, groups: { A: table('A'), B: table('B') },
+    players, games, groups: { P: table('P'), A: table('A') },
     registrants: players.slice(0, 7),
   };
 })();

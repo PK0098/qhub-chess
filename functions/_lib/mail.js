@@ -139,8 +139,8 @@ export const templates = {
       replyTo: opponent.email,
       html: layout(`Confirmed.`, `
         <p>Your game against <strong>${esc(opponent.name)}</strong> is in the books: <strong>${esc(outcomeText)}</strong>.</p>
-        ${button(env.SITE_URL + '/#standings', 'See standings')}`),
-      text: `Confirmed: ${outcomeText} vs ${opponent.name}. Standings: ${env.SITE_URL}/#standings`,
+        ${button(env.SITE_URL + '/#groups', 'See the groups')}`),
+      text: `Confirmed: ${outcomeText} vs ${opponent.name}. Standings: ${env.SITE_URL}/#groups`,
     };
   },
 

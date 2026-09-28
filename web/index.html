@@ -54,8 +54,9 @@
       <div class="nav-links">
         <a href="#rules"><span class="idx">[1] </span>Rules</a>
         <a href="#register" class="accent" data-only="registration"><span class="idx">[2] </span>Register</a>
-        <a href="#standings" data-only="play"><span class="idx">[2] </span><span id="nav-standings">Standings</span></a>
-        <a href="#players"><span class="idx">[3] </span>Players</a>
+        <a href="#groups" data-only="play"><span class="idx">[2] </span>Groups</a>
+        <a href="#bracket" data-only="play"><span class="idx">[3] </span>Bracket</a>
+        <a href="#players"><span class="idx" data-only="registration">[3] </span><span class="idx" data-only="play">[4] </span>Players</a>
       </div>
     </div>
   </nav>
@@ -68,12 +69,15 @@
   <div class="wrap hero-inner">
     <div class="hero-row">
       <div>
+        <div class="badge" data-only="play"><span class="dot"></span><span id="stage-label">Group stage live</span></div>
         <h1>Q hub Friendly <span class="outline">Chess</span> Tournament<span class="accent">.</span></h1>
-        <p class="lede">May the best pawn win.<br>Ten minutes across a board is the fastest way to meet someone from another team at Q hub. <span data-only="registration">Sign up, learn a few names, lose gracefully.</span><span data-only="play">Play everyone, learn a few names, lose gracefully.</span></p>
+        <p class="lede">May the best pawn win.<br>Ten minutes across a board is the fastest way to meet someone from another team at Q hub. <span data-only="registration">Sign up, learn a few names, lose gracefully.</span><span data-only="play">Two groups, four knockout games, one champion.</span></p>
         <div class="cta-row">
           <a href="#register" class="btn btn-primary" data-only="registration">Register now <span aria-hidden="true">→</span></a>
-          <a href="#standings" class="btn btn-primary" data-only="play" id="cta-standings">See standings <span aria-hidden="true">→</span></a>
-          <a href="#rules" class="btn btn-ghost">Rules</a>
+          <a href="#groups" class="btn btn-primary" data-only="play">Groups <span aria-hidden="true">→</span></a>
+          <a href="#bracket" class="btn btn-ghost" data-only="play">Bracket</a>
+          <a href="#rules" class="btn btn-ghost" data-only="registration">Rules</a>
+          <a href="#rules" class="btn btn-text" data-only="play">Rules</a>
         </div>
       </div>
       <div class="coin" aria-hidden="true">
@@ -106,8 +110,8 @@
   <div class="wrap">
     <div class="stat-grid">
       <div class="stat"><div class="stat-n" id="play-count">0</div><div class="stat-l">players</div></div>
-      <div class="stat"><div class="stat-n" id="play-total">0</div><div class="stat-l">games total</div></div>
-      <div class="stat"><div class="stat-n accent" id="play-played">0</div><div class="stat-l">played so far</div></div>
+      <div class="stat"><div class="stat-n">2</div><div class="stat-l">groups of <span id="play-group-size">6</span></div></div>
+      <div class="stat"><div class="stat-n"><span class="accent" id="play-played">0</span>/<span id="play-total">0</span></div><div class="stat-l">games played</div></div>
       <div class="stat"><div class="stat-n">0</div><div class="stat-l">grandmasters</div></div>
     </div>
   </div>
@@ -117,12 +121,48 @@
 <section id="rules" class="rules">
   <div class="watermark wm-right" aria-hidden="true">♞</div>
   <div class="wrap section-pad">
+    <div class="kicker">§ 01 / How it works</div>
+    <h2>The rules,<br><span class="outline-dark" data-only="registration">so far.</span><span class="outline-dark" data-only="play">briefly.</span></h2>
+    <p class="sub" data-only="registration">Two groups, a knockout, and a clock that doesn't care who you are.</p>
+    <p class="sub" data-only="play">Three stages. <span id="rules-n">Twelve</span> players become four, four become one.</p>
+    <div data-only="play"><div class="stages" id="stages"></div></div>
     <div class="rules-grid">
+      <ol class="rule-list">
+        <li class="rule rule-wide light" data-only="registration">
+          <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♜</span></div>
+          <div class="rule-title">Format: two groups, then a knockout</div>
+          <div class="rule-text">Whatever the headcount, once registration closes everyone is drawn at random into two groups:</div>
+          <div class="format-grid">
+            <div class="format-card"><div class="format-title">Group stage</div><div class="format-text">Group Petrosian and Group Aronian, named after two Armenian greats. Play everyone in your group once. Win 3 · Draw 1 · Loss 0. The top two of each group advance.</div></div>
+            <div class="format-card"><div class="format-title">Semis &amp; final</div><div class="format-text">Group winners meet the other group's runner-up. Winners play the final, losers play for third. No draws: replay until someone wins.</div></div>
+          </div>
+        </li>
+        <li class="rule light" data-only="play">
+          <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♛</span></div>
+          <div class="rule-title">Ten minutes each</div>
+          <div class="rule-text">Every game, groups and knockouts alike, is played with a 10-minute timer per player (10+0, no increment). Colors by coin toss (or rock-paper-scissors, we're not picky).</div>
+        </li>
+        <li class="rule" data-only="registration">
+          <div class="rule-head"><span class="rule-n">2.</span><span class="rule-piece">♛</span></div>
+          <div class="rule-title">Ten minutes each</div>
+          <div class="rule-text">Whatever the format, every game is played with a 10-minute timer per player (10+0, no increment). This one is not up for a vote.</div>
+        </li>
+        <li class="rule light">
+          <div class="rule-head"><span class="rule-n"><span data-only="registration">3.</span><span data-only="play">2.</span></span><span class="rule-piece">♝</span></div>
+          <div class="rule-title">Play nice</div>
+          <div class="rule-text">Standard chess rules apply. Touch-move, be nice, have fun.</div>
+        </li>
+        <li class="rule light">
+          <div class="rule-head"><span class="rule-n"><span data-only="registration">4.</span><span data-only="play">3.</span></span><span class="rule-piece">♞</span></div>
+          <div class="rule-title">Your game, your schedule</div>
+          <div class="rule-text"><span data-only="registration">Once pairings are out you get an email introducing your opponent, with a link to report the result. Reply to agree a time, meet at the chess sets in the kitchen on floor 4 or 5, play, then report. If you already know each other, skip the emails and just play.</span><span data-only="play">Your pairing email introduces your opponent and has a link to report the result. Reply to agree a time, meet at the chess sets in the kitchen on floor 4 or 5, play, then report. Know each other already? Just play and report.</span></div>
+        </li>
+        <li class="rule dark">
+          <div class="rule-n"><span data-only="registration">5.</span><span data-only="play">4.</span> (unofficial)</div>
+          <div class="rule-title big">Losing to the intern is not a bug.<br>It's a feature.</div>
+        </li>
+      </ol>
       <div>
-        <div class="kicker">§ 01 / How it works</div>
-        <h2>The rules,<br><span class="outline-dark" data-only="registration">so far.</span><span class="outline-dark" data-only="play">briefly.</span></h2>
-        <p class="sub" data-only="registration">Two groups, a knockout, and a clock that doesn't care who you are.</p>
-        <p class="sub" data-only="play">Five rules. That's it. Read them once, then go find someone to play.</p>
         <div class="clock-card">
           <div class="clock-title">Boards &amp; clock</div>
           <p>Chess sets are in the kitchens on <span class="accent strong">floors 4 and 5</span>. For the clock, grab the free Chess.com app and set it to <span class="accent strong">10 + 0</span>.</p>
@@ -138,46 +178,6 @@
           </div>
         </div>
       </div>
-      <ol class="rule-list">
-        <li class="rule rule-wide light" data-only="registration">
-          <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♜</span></div>
-          <div class="rule-title">Format: two groups, then a knockout</div>
-          <div class="rule-text">Whatever the headcount, once registration closes everyone is drawn at random into two groups:</div>
-          <div class="format-grid">
-            <div class="format-card"><div class="format-title">Group stage</div><div class="format-text">Play everyone in your group once. Win 3 · Draw 1 · Loss 0. The top two of each group advance.</div></div>
-            <div class="format-card"><div class="format-title">Semis &amp; final</div><div class="format-text">Group winners meet the other group's runner-up. Winners play the final, losers play for third. No draws: replay until someone wins.</div></div>
-          </div>
-        </li>
-        <li class="rule light" data-only="play">
-          <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♜</span></div>
-          <div class="rule-title">Groups, then a knockout</div>
-          <div class="rule-text">You play everyone in your group once. The top two of each group go to the semi-finals (A1 vs B2, B1 vs A2), then the final and a third-place game. No draws in the knockout: replay until someone wins. Colors by coin toss (or rock-paper-scissors, we're not picky).</div>
-        </li>
-        <li class="rule">
-          <div class="rule-head"><span class="rule-n">2.</span><span class="rule-piece">♛</span></div>
-          <div class="rule-title">Ten minutes each</div>
-          <div class="rule-text">Whatever the format, every game is played with a 10-minute timer per player (10+0, no increment). This one is not up for a vote.</div>
-        </li>
-        <li class="rule" data-only="play">
-          <div class="rule-head"><span class="rule-n">3.</span><span class="rule-piece">♚</span></div>
-          <div class="rule-title">3 · 1 · 0</div>
-          <div class="rule-text">Win = 3 points, Draw = 1 point, Loss = 0 points.</div>
-        </li>
-        <li class="rule light">
-          <div class="rule-head"><span class="rule-n"><span data-only="registration">3.</span><span data-only="play">4.</span></span><span class="rule-piece">♝</span></div>
-          <div class="rule-title">Play nice</div>
-          <div class="rule-text">Standard chess rules apply. Touch-move, be nice, have fun.</div>
-        </li>
-        <li class="rule light">
-          <div class="rule-head"><span class="rule-n"><span data-only="registration">4.</span><span data-only="play">5.</span></span><span class="rule-piece">♞</span></div>
-          <div class="rule-title">Your game, your schedule</div>
-          <div class="rule-text"><span data-only="registration">Once pairings are out you get an email introducing your opponent, with a link to report the result. Reply to agree a time, meet at the chess sets in the kitchen on floor 4 or 5, play, then report. If you already know each other, skip the emails and just play.</span><span data-only="play">Your pairing email introduces your opponent and has a link to report the result. Reply to agree a time, meet at the chess sets in the kitchen on floor 4 or 5, play, then report. Know each other already? Just play and report.</span></div>
-        </li>
-        <li class="rule dark">
-          <div class="rule-n"><span data-only="registration">5.</span><span data-only="play">6.</span> (unofficial)</div>
-          <div class="rule-title big">Losing to the intern is not a bug.<br>It's a feature.</div>
-        </li>
-      </ol>
     </div>
   </div>
 </section>
@@ -239,45 +239,52 @@
   </div>
 </section>
 
-<!-- STANDINGS (play only) -->
-<section id="standings" class="standings" data-only="play">
+<!-- GROUPS (play only) -->
+<section id="groups" class="standings" data-only="play">
   <div class="wrap section-pad">
     <div class="standings-head">
       <div>
         <div class="kicker">§ 02 / Group stage</div>
-        <h2>Standings<span class="accent">.</span></h2>
+        <h2>Groups<span class="accent">.</span></h2>
+        <p class="sub light">Named after the two Armenians every chess player knows. Everyone plays everyone in their group once. Top two go through.</p>
       </div>
-      <div class="updated"><span class="live"></span>updated <span id="updated-label">today</span> · <span id="st-played">0</span>/<span id="st-total">0</span> games</div>
-    </div>
-    <div class="groups" id="groups"></div>
-    <p class="group-note">Top two of each group advance. Ties: points, head-to-head, wins, then lots.</p>
-  </div>
-</section>
-
-<!-- BRACKET (play only) -->
-<section id="bracket" class="standings bracket" data-only="play">
-  <div class="wrap section-pad">
-    <div class="standings-head">
-      <div>
-        <div class="kicker">§ 02 / Knockout</div>
-        <h2>The bracket<span class="accent">.</span></h2>
+      <div class="groups-tools">
+        <div class="seg" role="tablist">
+          <button type="button" role="tab" class="seg-btn on" id="view-table">Table</button>
+          <button type="button" role="tab" class="seg-btn" id="view-cross">Crosstable</button>
+        </div>
+        <div class="updated"><span class="live"></span>updated <span id="updated-label">today</span> · <span id="st-played">0</span>/<span id="st-total">0</span> group games</div>
       </div>
-      <div class="updated"><span class="live"></span>semis, final, third place · no draws</div>
     </div>
-    <div class="br-scroll"><div class="br-cols" id="bracket-cols"></div></div>
+    <div class="groups" id="group-panels"></div>
+    <p class="group-note">Ties: points, then head-to-head, then wins, then drawing of lots.</p>
   </div>
 </section>
 
 <div class="checker alt" aria-hidden="true"></div>
 
+<!-- BRACKET (play only) -->
+<section id="bracket" class="bracket" data-only="play">
+  <div class="watermark wm-right-low" aria-hidden="true">♚</div>
+  <div class="wrap section-pad">
+    <div class="kicker">§ 03 / Knockouts</div>
+    <h2>The bracket<span class="accent">.</span></h2>
+    <p class="sub">Group winners face the other group's runner-up. <span id="bracket-note"></span></p>
+    <div class="bracket-grid" id="bracket-grid"></div>
+  </div>
+</section>
+
+<div class="checker" aria-hidden="true"></div>
+
 <!-- PLAYERS -->
 <section id="players" class="players">
   <div class="watermark wm-left-low" aria-hidden="true">♟</div>
   <div class="wrap section-pad">
-    <div class="kicker"><span data-only="registration">§ 03 / The field so far</span><span data-only="play">§ 03 / The field</span></div>
+    <div class="kicker"><span data-only="registration">§ 03 / The field so far</span><span data-only="play">§ 04 / The field</span></div>
     <h2><span data-only="registration">Already in</span><span data-only="play">The players</span><span class="accent">.</span></h2>
     <p class="sub" data-only="registration"><span id="players-n-reg">0</span> brave colleagues and counting. Some of them know how the knight moves.</p>
     <p class="sub" data-only="play"><span id="players-n-play">0</span> brave colleagues. Some of them know how the knight moves. Combined Elo: undisclosed.</p>
+    <div data-only="play"><div class="filters" id="filters"></div></div>
     <div class="player-grid" id="player-grid"></div>
   </div>
 </section>
