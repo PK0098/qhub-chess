@@ -11,14 +11,14 @@ export const onRequestPost = handle(async ({ request, env }) => {
   if (players.length < 4) throw bad('Need at least 4 players for two groups', 400);
 
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
-  const { lots, A, B } = splitGroups(players.map((p) => p.id), seed);
-  const games = groupPairings(A, B);
+  const { lots, P, A } = splitGroups(players.map((p) => p.id), seed);
+  const games = groupPairings(P, A);
 
   const setGrp = db.prepare('UPDATE players SET grp = ? WHERE id = ?');
   const ins = db.prepare('INSERT INTO games (round, slot, p1, p2, status) VALUES (?, ?, ?, ?, ?)');
   await db.batch([
+    ...P.map((id) => setGrp.bind('P', id)),
     ...A.map((id) => setGrp.bind('A', id)),
-    ...B.map((id) => setGrp.bind('B', id)),
     ...games.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')),
   ]);
   await setSetting(db, 'format', 'groups');
@@ -28,5 +28,5 @@ export const onRequestPost = handle(async ({ request, env }) => {
 
   const created = await listGames(db);
   await emailPairings(db, env, created, 'group');
-  return json({ ok: true, format: 'groups', players: players.length, groups: { A: A.length, B: B.length }, games: created.length });
+  return json({ ok: true, format: 'groups', players: players.length, groups: { P: P.length, A: A.length }, games: created.length });
 });

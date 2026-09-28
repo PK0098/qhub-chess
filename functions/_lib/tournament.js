@@ -22,19 +22,25 @@ function shuffle(arr, rand) {
   return a;
 }
 
-// Random split into two groups. `lots` is the shuffled order (A first) and
+// The two groups, named after two Armenian greats. Keys are what `players.grp` stores.
+export const GROUPS = {
+  P: { name: 'Petrosian', full: 'Group Petrosian' },
+  A: { name: 'Aronian', full: 'Group Aronian' },
+};
+
+// Random split into two groups. `lots` is the shuffled order (P first) and
 // doubles as the drawing-of-lots order for tiebreaks.
 export function splitGroups(ids, seed) {
   const lots = shuffle(ids, mulberry32(seed));
   const half = Math.ceil(lots.length / 2);
-  return { lots, A: lots.slice(0, half), B: lots.slice(half) };
+  return { lots, P: lots.slice(0, half), A: lots.slice(half) };
 }
 
-// Round 1: every pair inside each group, slots running across A then B.
-export function groupPairings(A, B) {
+// Round 1: every pair inside each group, slots running across P then A.
+export function groupPairings(P, A) {
   const games = [];
   let slot = 0;
-  for (const ids of [A, B]) {
+  for (const ids of [P, A]) {
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) games.push({ round: 1, slot: slot++, p1: ids[i], p2: ids[j] });
     }
@@ -88,11 +94,11 @@ export function groupTable(ids, games, lots) {
   return out.map((r) => ({ ...r, form: r.form.slice(-5) }));
 }
 
-// Round 2: A1 vs B2, B1 vs A2. Tables are ordered rows from groupTable.
-export function semiPairings(tableA, tableB) {
+// Round 2: P1 vs A2, A1 vs P2. Tables are ordered rows from groupTable.
+export function semiPairings(tableP, tableA) {
   return [
-    { round: 2, slot: 0, p1: tableA[0].id, p2: tableB[1].id },
-    { round: 2, slot: 1, p1: tableB[0].id, p2: tableA[1].id },
+    { round: 2, slot: 0, p1: tableP[0].id, p2: tableA[1].id },
+    { round: 2, slot: 1, p1: tableA[0].id, p2: tableP[1].id },
   ];
 }
 

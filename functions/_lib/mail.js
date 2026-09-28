@@ -1,4 +1,7 @@
 // Email via Resend. Never throws: callers must not fail a request because mail failed.
+import { GROUPS } from './tournament.js';
+
+const groupName = (key) => (GROUPS[key] ? GROUPS[key].full : 'your group');
 
 // Without a Resend key (local dev) the email is captured in the `outbox` table
 // instead, so the whole flow can be read on the admin page.
@@ -60,7 +63,7 @@ export const templates = {
       html: layout(`You're on the board, ${esc(first(player.name))}.`, `
         <p>Your card is <strong>${esc(player.code)}</strong>: ${esc(player.name)}, ${esc(player.company)}.</p>
         <p>Registration closes <strong>${fmtDate(env.CLOSE_DATE)}</strong>. Games start <strong>${fmtDate(env.START_DATE)}</strong>.</p>
-        <p>The format: everyone is drawn at random into two groups. You play everyone in your group once (win 3, draw 1, loss 0). The top two of each group go to the semi-finals, then there's a final. Once the field is set you'll get one email with your group opponents and their email addresses, so you can arrange times together.</p>
+        <p>The format: a random draw sorts everyone into <strong>Group Petrosian</strong> and <strong>Group Aronian</strong>. You play everyone in your group once (win 3, draw 1, loss 0, excuses 0). The top two of each group go to the semi-finals, then there's a final. Once the field is set you'll get one email with your group opponents and their email addresses, so you can arrange times together.</p>
         <p>Every game: 10 minutes each, no increment. Standard rules. Be nice. Chess sets are in the kitchens on floors 4 and 5.</p>
         ${button(url, 'Your player page')}
         <p style="font-size:12px;color:#5c5548">Keep this email. The link above is personal and is how you report results.</p>`),
@@ -70,22 +73,23 @@ export const templates = {
 
   // stage: 'group' | 'semi' | 'final' | 'third'. games: [{id, opponent:{name,company,email}}]
   pairings(env, { player, stage, games }) {
+    const grp = groupName(player.grp);
     const rows = games.map((g) =>
       `<li style="margin:8px 0">${opponentLine(g.opponent)}<br><a href="${esc(gameLink(env, player.token, g.id))}" style="color:#2b3f6b">Report this result</a></li>`).join('');
     const stageName = { semi: 'Semi-final', final: 'The final', third: 'Third-place game' }[stage];
-    const title = stage === 'group' ? `Pairings are out. You're in group ${esc(player.grp)}.` : `${stageName}: your opponent.`;
+    const title = stage === 'group' ? `Pairings are out. You're in ${esc(grp)}.` : `${stageName}: your opponent.`;
     const intro = {
-      group: `<p>Registration is closed. You're in <strong>group ${esc(player.grp)}</strong>. Play everyone in your group once: win 3, draw 1, loss 0. The top two of each group go to the semi-finals.</p>`,
-      semi: `<p>You finished in the top two of your group. The semi-final is one game: the winner plays the final, the loser plays for third place.</p>`,
-      final: `<p>You won your semi-final. One game for the title.</p>`,
-      third: `<p>You lost your semi-final, but bronze is still on the table. One game for third place.</p>`,
+      group: `<p>Registration is closed and the hat has spoken: you're in <strong>${esc(grp)}</strong>. Play everyone in your group once. Win 3, draw 1, loss 0, excuses 0. The top two go to the semi-finals.</p>`,
+      semi: `<p>Top two in your group. Nice. The semi-final is one game: win it and you play the final, lose it and you play for bronze (still a medal, still bragging rights).</p>`,
+      final: `<p>You won your semi. One more game and it's your name on the site for a whole year. No pressure.</p>`,
+      third: `<p>The semi didn't go your way, but bronze is still up for grabs. One game, one podium spot.</p>`,
     }[stage];
     const replyTo = games.map((g) => g.opponent.email);
-    const howTo = `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets are in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0.</p>`;
-    const noDraw = stage === 'group' ? '' : `<p><strong>No draws from here on.</strong> If a game is drawn, play again until someone wins, then report that result.</p>`;
-    const reporting = `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation.</p>`;
+    const howTo = `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets live in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0. Snacks optional but encouraged.</p>`;
+    const noDraw = stage === 'group' ? '' : `<p><strong>No draws from here on.</strong> If a game is drawn, play again until someone cracks, then report that result.</p>`;
+    const reporting = `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation, so don't ghost your opponent.</p>`;
     return {
-      subject: stage === 'group' ? `Pairings are out — you're in group ${player.grp}` : `${stageName}: your opponent`,
+      subject: stage === 'group' ? `Pairings are out — you're in ${grp}` : `${stageName}: your opponent`,
       replyTo: replyTo.length === 1 ? replyTo[0] : undefined,
       html: layout(title, `${intro}
         ${howTo}
@@ -102,22 +106,16 @@ export const templates = {
     return {
       subject: `Format update: two groups, then a knockout`,
       html: layout(`Format update.`, `
-        <p>Hi ${esc(first(player.name))}, thanks for signing up. One change: the format no longer depends on how many people register. It is now fixed, whatever the headcount:</p>
+        <p>Hi ${esc(first(player.name))}, small update from tournament HQ (Pouya's desk). The format no longer depends on how many people sign up. It's now fixed, whatever the headcount:</p>
         <ol style="padding-left:20px;margin:0 0 14px">
-          <li style="margin:6px 0">Everyone is drawn at random into <strong>two groups</strong>.</li>
+          <li style="margin:6px 0">A random draw sorts everyone into two groups: <strong>Group Petrosian</strong> and <strong>Group Aronian</strong>.</li>
           <li style="margin:6px 0">You play everyone in your group once. Win 3, draw 1, loss 0.</li>
-          <li style="margin:6px 0">The <strong>top two</strong> of each group go to the semi-finals: group winners meet the other group's runner-up.</li>
-          <li style="margin:6px 0">Semi winners play the <strong>final</strong>; semi losers play for third place. No draws in the knockout: replay until someone wins.</li>
+          <li style="margin:6px 0">The <strong>top two</strong> of each group go to the semi-finals: each group winner meets the other group's runner-up.</li>
+          <li style="margin:6px 0">Semi winners play the <strong>final</strong>, semi losers play for bronze. No draws in the knockout: play again until someone cracks.</li>
         </ol>
-        <p>Nothing to do now. Registration still closes <strong>${fmtDate(env.CLOSE_DATE)}</strong> and your pairings arrive by email right after. Still 10 minutes each, no increment.</p>
+        <p>Nothing to do now. Registration still closes <strong>${fmtDate(env.CLOSE_DATE)}</strong> and your pairings land in your inbox right after. Still 10 minutes each, still no increment, still no mercy.</p>
         ${button(env.SITE_URL, 'See the site')}`),
-      text: `Hi ${first(player.name)}, one change: the format is now fixed regardless of headcount.
-1. Everyone is drawn at random into two groups.
-2. You play everyone in your group once (3/1/0).
-3. Top two of each group go to the semi-finals (group winners vs the other group's runner-up).
-4. Semi winners play the final; semi losers play for third. No draws in the knockout.
-Nothing to do now. Registration closes ${fmtDate(env.CLOSE_DATE)}; pairings arrive by email after that.
-${env.SITE_URL}`,
+      text: `Hi ${first(player.name)}, small update: the format is now fixed regardless of headcount.\n1. A random draw sorts everyone into Group Petrosian and Group Aronian.\n2. You play everyone in your group once (3/1/0).\n3. Top two of each group go to the semi-finals (group winner vs the other group's runner-up).\n4. Semi winners play the final, semi losers play for bronze. No draws in the knockout.\nNothing to do now. Registration closes ${fmtDate(env.CLOSE_DATE)}; pairings arrive by email right after.\n${env.SITE_URL}`,
     };
   },
 

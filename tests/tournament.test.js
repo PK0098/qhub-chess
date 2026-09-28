@@ -13,19 +13,19 @@ test('splitGroups is deterministic per seed and sizes are ceil/floor', () => {
   const a = splitGroups(ids, 42), b = splitGroups(ids, 42), c = splitGroups(ids, 43);
   assert.deepEqual(a, b);
   assert.notDeepEqual(a.lots, c.lots, 'a different seed should shuffle differently');
-  assert.equal(a.A.length, 4); assert.equal(a.B.length, 3);
-  assert.deepEqual([...a.A, ...a.B].sort((x, y) => x - y), ids, 'every player lands in exactly one group');
-  assert.deepEqual(a.lots, [...a.A, ...a.B], 'lots order is the shuffled order, A first');
+  assert.equal(a.P.length, 4); assert.equal(a.A.length, 3);
+  assert.deepEqual([...a.P, ...a.A].sort((x, y) => x - y), ids, 'every player lands in exactly one group');
+  assert.deepEqual(a.lots, [...a.P, ...a.A], 'lots order is the shuffled order, P first');
 });
 
 // Group stage is a league inside each group only: no cross-group games.
 test('groupPairings pairs everyone once inside each group with running slots', () => {
   const games = groupPairings([1, 2, 3], [4, 5, 6, 7]);
   assert.equal(games.length, 3 + 6);
-  const A = new Set([1, 2, 3]);
+  const P = new Set([1, 2, 3]);
   for (const g of games) {
     assert.equal(g.round, 1);
-    assert.equal(A.has(g.p1), A.has(g.p2), 'cross-group pairing ' + g.p1 + '-' + g.p2);
+    assert.equal(P.has(g.p1), P.has(g.p2), 'cross-group pairing ' + g.p1 + '-' + g.p2);
   }
   assert.deepEqual(games.map((g) => g.slot), [...Array(9).keys()]);
   assert.equal(new Set(games.map((g) => [g.p1, g.p2].sort().join('-'))).size, 9);
@@ -71,9 +71,9 @@ test('groupTable ignores unconfirmed and out-of-group games', () => {
 });
 
 // Crossover: group winners meet the other group's runner-up.
-test('semiPairings crosses A1-B2 and B1-A2', () => {
-  const A = [{ id: 11 }, { id: 12 }, { id: 13 }], B = [{ id: 21 }, { id: 22 }];
-  assert.deepEqual(semiPairings(A, B), [
+test('semiPairings crosses P1-A2 and A1-P2', () => {
+  const P = [{ id: 11 }, { id: 12 }, { id: 13 }], A = [{ id: 21 }, { id: 22 }];
+  assert.deepEqual(semiPairings(P, A), [
     { round: 2, slot: 0, p1: 11, p2: 22 },
     { round: 2, slot: 1, p1: 21, p2: 12 },
   ]);

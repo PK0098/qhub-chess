@@ -37,7 +37,7 @@
     $('kv').innerHTML = `
       <div>Phase<b>${esc(phase)}</b></div><div>Format<b>${d.settings.format ? 'groups' : '—'}</b></div>
       <div>Players<b>${d.players.length}</b></div><div>Games confirmed<b>${d.games.filter((g) => g.status === 'confirmed' && g.p2 !== null).length} / ${d.games.filter((g) => g.p2 !== null).length}</b></div>
-      <div>Groups<b>${d.players.filter((p) => p.grp === 'A').length} / ${d.players.filter((p) => p.grp === 'B').length}</b></div>
+      <div>Groups P / A<b>${d.players.filter((p) => p.grp === 'P').length} / ${d.players.filter((p) => p.grp === 'A').length}</b></div>
       <div>Flyer scans<b>${esc(d.settings.flyer_scans || 0)}</b></div><div>Announced<b style="font-size:12px">${esc(d.settings.announced_at ? d.settings.announced_at.slice(0, 16).replace('T', ' ') : 'not yet')}</b></div><div>Closes<b style="font-size:13px">${esc(d.vars.CLOSE_DATE)}</b></div>
       <div>Mail from<b style="font-size:12px">${esc(d.vars.MAIL_FROM)}</b></div><div>Site<b style="font-size:12px">${esc(d.vars.SITE_URL)}</b></div>`;
     $('close-btn').disabled = phase !== 'registration' || d.players.length < 4;
@@ -84,7 +84,7 @@
   $('close-btn').onclick = async () => {
     if (!confirm('Close registration now? This draws the two groups, creates all group games and emails every player. It cannot be undone.')) return;
     $('close-btn').disabled = true;
-    try { const r = await api('close', {}); msg($('msg'), `Closed. ${r.players} players in groups of ${r.groups.A} and ${r.groups.B}, ${r.games} games created. Emails sent.`, 'ok'); }
+    try { const r = await api('close', {}); msg($('msg'), `Closed. ${r.players} players: Petrosian ${r.groups.P}, Aronian ${r.groups.A}. ${r.games} games created. Emails sent.`, 'ok'); }
     catch (e) { msg($('msg'), esc(e.message), 'bad'); }
     load();
   };

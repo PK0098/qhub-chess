@@ -22,7 +22,7 @@ export async function sweep(db, env) {
 export async function groupTables(db, players, games) {
   const lots = JSON.parse((await getSetting(db, 'lots')) || '[]');
   const ids = (g) => players.filter((p) => p.grp === g).map((p) => p.id);
-  return { A: groupTable(ids('A'), games, lots), B: groupTable(ids('B'), games, lots) };
+  return { P: groupTable(ids('P'), games, lots), A: groupTable(ids('A'), games, lots) };
 }
 
 export async function advanceGroups(db, env) {
@@ -36,7 +36,7 @@ export async function advanceGroups(db, env) {
   if (round(2).length === 0) {
     if (!allConfirmed(round(1))) return { advanced: [] };
     const tables = await groupTables(db, players, games);
-    const semis = semiPairings(tables.A, tables.B);
+    const semis = semiPairings(tables.P, tables.A);
     await db.batch(semis.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
     const created = (await listGames(db)).filter((g) => g.round === 2);
     await emailPairings(db, env, created, 'semi');
