@@ -63,22 +63,6 @@
   }
 
   // Same rules as the server: 3/1/0, sort by points then wins.
-  function standings(players, games) {
-    const rows = new Map(players.map((p) => [p.id, { ...p, played: 0, w: 0, d: 0, l: 0, points: 0, form: [] }]));
-    games.filter((g) => g.status === 'confirmed' && g.p2 !== null && g.result)
-      .sort((a, b) => String(a.confirmedAt).localeCompare(String(b.confirmedAt)))
-      .forEach((g) => {
-        const a = rows.get(g.p1), b = rows.get(g.p2); if (!a || !b) return;
-        a.played++; b.played++;
-        if (g.result === '1-0') { a.w++; b.l++; a.form.push('W'); b.form.push('L'); }
-        else if (g.result === '0-1') { b.w++; a.l++; b.form.push('W'); a.form.push('L'); }
-        else { a.d++; b.d++; a.form.push('D'); b.form.push('D'); }
-      });
-    return [...rows.values()].map((r) => ({ ...r, points: r.w * 3 + r.d, form: r.form.slice(-5) }))
-      .sort((a, b) => b.points - a.points || b.w - a.w || a.id - b.id);
-  }
-
-  // ---- registration phase -------------------------------------------------
   function initRegistration(state) {
     const close = new Date(state.closeDate);
     let players = decorate(state.players);
@@ -87,7 +71,6 @@
     function refresh() {
       const n = players.length;
       $('reg-count').textContent = n; $('already-n').textContent = n; $('players-n-reg').textContent = n;
-      $('reg-format').textContent = n >= state.knockoutFrom ? 'K.O.' : 'League';
       $('reg-code').textContent = 'P' + pad(n + 1); $('done-code').textContent = 'P' + pad(n + 1);
       renderTiles(players, { sub: (p) => p.company || 'Freelance', claim: true });
     }
@@ -216,17 +199,15 @@
     const byId = new Map(players.map((p) => [p.id, p]));
     const games = state.games;
     const n = players.length;
-    const real = games.filter((g) => g.p2 !== null);
-    const gamesPlayed = real.filter((g) => g.status === 'confirmed').length;
-    const ko = state.format === 'ko';
-    document.body.dataset.format = ko ? 'ko' : 'rr';
+    const gamesPlayed = games.filter((g) => g.status === 'confirmed').length;
+    const sizeA = players.filter((p) => p.grp === 'A').length, sizeB = n - sizeA;
+    const total = sizeA * (sizeA - 1) / 2 + sizeB * (sizeB - 1) / 2 + 4;
 
     $('play-count').textContent = n;
-    $('play-total').textContent = ko ? real.length : n * (n - 1) / 2;
+    $('play-total').textContent = total;
     $('play-played').textContent = gamesPlayed;
     $('players-n-play').textContent = n;
-    if ($('hero-format')) $('hero-format').textContent = ko ? 'Knockout bracket' : 'Single round robin';
-    if (ko) { $('nav-standings').textContent = 'Bracket'; $('nav-standings').href = '#bracket'; $('cta-standings').href = '#bracket'; }
+    if ($('hero-format')) $('hero-format').textContent = '2 groups + knockout';
 
     if (state.phase === 'done' && state.champion && byId.get(state.champion)) {
       const c = byId.get(state.champion);
@@ -234,74 +215,75 @@
       $('champion-name').textContent = c.name; $('champion-company').textContent = c.company;
     }
 
-    if (ko) renderBracket(games, byId);
-    else renderStandings(players, games, gamesPlayed, ko ? real.length : n * (n - 1) / 2);
+    renderGroups(state.groups || { A: [], B: [] }, byId, games, gamesPlayed, total);
+    renderBracket(games, byId);
 
-    renderTiles(players, { sub: (p) => p.tag || p.company, claim: false });
+    renderTiles(players, { sub: (p) => (p.grp ? `Group ${p.grp} · ` : '') + (p.tag || p.company), claim: false });
     initTicker();
   }
 
-  function renderStandings(players, games, played, total) {
-    const sorted = standings(players, games);
+  // Tables come ordered from the server (points, head-to-head, wins, lots); we only draw them.
+  function renderGroups(groups, byId, games, played, total) {
     $('st-played').textContent = played; $('st-total').textContent = total;
     const last = games.filter((g) => g.confirmedAt).map((g) => g.confirmedAt).sort().pop();
     $('updated-label').textContent = last ? new Date(last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'just now';
-    const podium = $('podium'); podium.innerHTML = '';
-    sorted.slice(0, 3).forEach((p, i) => {
-      const el = document.createElement('div');
-      el.className = 'pod'; el.style.setProperty('--pc', MEDAL[i].bg);
-      el.innerHTML = `<div class="pod-rank">${i + 1}</div><div><div class="pod-name"></div><div class="pod-rec">${p.points} pts · ${p.w}W ${p.d}D ${p.l}L</div></div><div class="pod-piece">${MEDAL[i].piece}</div>`;
-      el.querySelector('.pod-name').textContent = p.name;
-      podium.appendChild(el);
-    });
-    const rows = $('rows'); rows.innerHTML = '';
-    sorted.forEach((p, i) => {
-      const tr = document.createElement('tr');
-      const m = i < 3 ? MEDAL[i] : null;
-      if (m) tr.className = 'top';
-      const form = p.form.map((l) => `<span class="chip ${l}">${l}</span>`).join('');
-      tr.innerHTML = `
-        <td><span class="rank-badge" style="${m ? `background:${m.bg};color:#1c1a17` : ''}">${pad(i + 1)}</span></td>
-        <td><span class="player-cell"></span></td>
-        <td class="c-c muted">${p.played}</td><td class="c-c">${p.w}</td><td class="c-c">${p.d}</td><td class="c-c">${p.l}</td>
-        <td><div class="form-row">${form}</div></td>
-        <td class="pts">${p.points}</td>`;
-      const cell = tr.querySelector('.player-cell');
-      cell.appendChild(avatarEl(p, 'sm'));
-      const nm = document.createElement('span'); nm.textContent = p.name; cell.appendChild(nm);
-      rows.appendChild(tr);
-    });
+    const wrap = $('groups'); wrap.innerHTML = '';
+    for (const key of ['A', 'B']) {
+      const box = document.createElement('div');
+      box.innerHTML = `<div class="group-title">Group <span>${key}</span></div>
+        <div class="table-card"><div class="table-scroll"><table class="table"><thead><tr>
+          <th scope="col" class="c-rank">#</th><th scope="col">Player</th>
+          <th scope="col" class="c-c" title="Played">P</th><th scope="col" class="c-c" title="Won">W</th>
+          <th scope="col" class="c-c" title="Drawn">D</th><th scope="col" class="c-c" title="Lost">L</th>
+          <th scope="col" class="c-form">Last 5</th><th scope="col" class="c-pts accent">Pts</th>
+        </tr></thead><tbody></tbody></table></div></div>`;
+      const rows = box.querySelector('tbody');
+      (groups[key] || []).forEach((r, i) => {
+        const p = byId.get(r.id); if (!p) return;
+        const tr = document.createElement('tr');
+        if (i < 2) tr.className = 'top';
+        const form = r.form.map((l) => `<span class="chip ${l}">${l}</span>`).join('');
+        tr.innerHTML = `
+          <td><span class="rank-badge">${pad(i + 1)}</span></td>
+          <td><span class="player-cell"></span></td>
+          <td class="c-c muted">${r.played}</td><td class="c-c">${r.w}</td><td class="c-c">${r.d}</td><td class="c-c">${r.l}</td>
+          <td><div class="form-row">${form}</div></td>
+          <td class="pts">${r.points}</td>`;
+        const cell = tr.querySelector('.player-cell');
+        cell.appendChild(avatarEl(p, 'sm'));
+        const nm = document.createElement('span'); nm.textContent = p.name; cell.appendChild(nm);
+        rows.appendChild(tr);
+      });
+      wrap.appendChild(box);
+    }
   }
 
+  // Fixed shape: two semis, then the final with the third-place game beneath it.
   function renderBracket(games, byId) {
     const wrap = $('bracket-cols'); wrap.innerHTML = '';
-    const rounds = [...new Set(games.map((g) => g.round))].sort((a, b) => a - b);
-    const size = games.filter((g) => g.round === 1).length * 2;
-    const totalRounds = Math.round(Math.log2(size));
-    const label = (r) => r === totalRounds ? 'Final' : r === totalRounds - 1 ? 'Semi-finals' : r === totalRounds - 2 ? 'Quarter-finals' : `Round ${r}`;
-    for (let r = 1; r <= totalRounds; r++) {
-      const col = document.createElement('div'); col.className = 'br-col';
-      col.innerHTML = `<div class="br-head">${label(r)}</div>`;
-      const list = rounds.includes(r) ? games.filter((g) => g.round === r).sort((a, b) => a.slot - b.slot) : Array.from({ length: size / Math.pow(2, r) }, () => null);
-      list.forEach((g) => {
-        const card = document.createElement('div'); card.className = 'br-game';
-        if (!g) { card.classList.add('tbd'); card.innerHTML = `<div class="br-p">TBD</div><div class="br-p">TBD</div>`; col.appendChild(card); return; }
-        const win = g.status === 'confirmed' ? (g.result === '1-0' ? g.p1 : g.result === '0-1' ? g.p2 : null) : null;
-        [g.p1, g.p2].forEach((pid) => {
-          const row = document.createElement('div'); row.className = 'br-p';
-          if (pid === null) { row.classList.add('bye'); row.textContent = 'bye'; }
-          else {
-            const p = byId.get(pid); row.textContent = p ? p.name : '?';
-            if (win === pid) row.classList.add('win');
-            else if (win !== null) row.classList.add('lost');
-          }
-          card.appendChild(row);
-        });
-        if (g.p2 !== null && g.status !== 'confirmed') { const s = document.createElement('div'); s.className = 'br-status'; s.textContent = g.status === 'reported' ? 'awaiting confirmation' : g.status === 'disputed' ? 'disputed' : 'to be played'; card.appendChild(s); }
-        col.appendChild(card);
+    const find = (round, slot) => games.find((g) => g.round === round && g.slot === slot) || null;
+    const card = (g, placeholder) => {
+      const el = document.createElement('div'); el.className = 'br-game';
+      if (!g) { el.classList.add('tbd'); el.innerHTML = `<div class="br-p">${placeholder[0]}</div><div class="br-p">${placeholder[1]}</div>`; return el; }
+      const win = g.status === 'confirmed' ? (g.result === '1-0' ? g.p1 : g.result === '0-1' ? g.p2 : null) : null;
+      [g.p1, g.p2].forEach((pid) => {
+        const row = document.createElement('div'); row.className = 'br-p';
+        const p = byId.get(pid); row.textContent = p ? p.name : '?';
+        if (win === pid) row.classList.add('win'); else if (win !== null) row.classList.add('lost');
+        el.appendChild(row);
       });
-      wrap.appendChild(col);
-    }
+      if (g.status !== 'confirmed') { const s = document.createElement('div'); s.className = 'br-status'; s.textContent = g.status === 'reported' ? 'awaiting confirmation' : g.status === 'disputed' ? 'disputed' : 'to be played'; el.appendChild(s); }
+      return el;
+    };
+    const semis = document.createElement('div'); semis.className = 'br-col';
+    semis.innerHTML = '<div class="br-head">Semi-finals</div>';
+    semis.append(card(find(2, 0), ['Winner A', 'Runner-up B']), card(find(2, 1), ['Winner B', 'Runner-up A']));
+    const finals = document.createElement('div'); finals.className = 'br-col';
+    finals.innerHTML = '<div class="br-head">Final</div>';
+    finals.appendChild(card(find(3, 0), ['Semi 1 winner', 'Semi 2 winner']));
+    const third = document.createElement('div'); third.className = 'br-head br-sub'; third.textContent = 'Third place';
+    finals.append(third, card(find(3, 1), ['Semi 1 loser', 'Semi 2 loser']));
+    wrap.append(semis, finals);
   }
 
   function initTicker() {

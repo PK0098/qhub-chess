@@ -97,7 +97,7 @@
     <div class="stat-grid">
       <div class="stat"><div class="stat-n" id="reg-count">0</div><div class="stat-l">registered</div></div>
       <div class="stat"><div class="stat-n" id="reg-days">0</div><div class="stat-l">days to sign up</div></div>
-      <div class="stat"><div class="stat-n" id="reg-format">League</div><div class="stat-l">likely format</div></div>
+      <div class="stat"><div class="stat-n">2</div><div class="stat-l">groups, then a final</div></div>
       <div class="stat"><div class="stat-n">0</div><div class="stat-l">grandmasters</div></div>
     </div>
   </div>
@@ -121,7 +121,7 @@
       <div>
         <div class="kicker">§ 01 / How it works</div>
         <h2>The rules,<br><span class="outline-dark" data-only="registration">so far.</span><span class="outline-dark" data-only="play">briefly.</span></h2>
-        <p class="sub" data-only="registration">The format depends on how many of you show up. The clock doesn't.</p>
+        <p class="sub" data-only="registration">Two groups, a knockout, and a clock that doesn't care who you are.</p>
         <p class="sub" data-only="play">Five rules. That's it. Read them once, then go find someone to play.</p>
         <div class="clock-card">
           <div class="clock-title">Boards &amp; clock</div>
@@ -141,17 +141,17 @@
       <ol class="rule-list">
         <li class="rule rule-wide light" data-only="registration">
           <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♜</span></div>
-          <div class="rule-title">Format: decided by headcount</div>
-          <div class="rule-text">Once registration closes, the number of players picks the format:</div>
+          <div class="rule-title">Format: two groups, then a knockout</div>
+          <div class="rule-text">Whatever the headcount, once registration closes everyone is drawn at random into two groups:</div>
           <div class="format-grid">
-            <div class="format-card"><div class="format-title">Round robin league</div><div class="format-text">Smaller field. Everyone plays everyone once. Win 3 · Draw 1 · Loss 0.</div></div>
-            <div class="format-card"><div class="format-title">Knockout bracket</div><div class="format-text">Bigger field. Lose and you're out. Dramatic, but efficient.</div></div>
+            <div class="format-card"><div class="format-title">Group stage</div><div class="format-text">Play everyone in your group once. Win 3 · Draw 1 · Loss 0. The top two of each group advance.</div></div>
+            <div class="format-card"><div class="format-title">Semis &amp; final</div><div class="format-text">Group winners meet the other group's runner-up. Winners play the final, losers play for third. No draws: replay until someone wins.</div></div>
           </div>
         </li>
         <li class="rule light" data-only="play">
           <div class="rule-head"><span class="rule-n">1.</span><span class="rule-piece">♜</span></div>
-          <div class="rule-title">One game each</div>
-          <div class="rule-text">Every pair of players plays each other once — a single round robin. Colors are decided by coin toss (or rock-paper-scissors, we're not picky).</div>
+          <div class="rule-title">Groups, then a knockout</div>
+          <div class="rule-text">You play everyone in your group once. The top two of each group go to the semi-finals (A1 vs B2, B1 vs A2), then the final and a third-place game. No draws in the knockout: replay until someone wins. Colors by coin toss (or rock-paper-scissors, we're not picky).</div>
         </li>
         <li class="rule">
           <div class="rule-head"><span class="rule-n">2.</span><span class="rule-piece">♛</span></div>
@@ -244,35 +244,17 @@
   <div class="wrap section-pad">
     <div class="standings-head">
       <div>
-        <div class="kicker">§ 02 / Leaderboard</div>
+        <div class="kicker">§ 02 / Group stage</div>
         <h2>Standings<span class="accent">.</span></h2>
       </div>
       <div class="updated"><span class="live"></span>updated <span id="updated-label">today</span> · <span id="st-played">0</span>/<span id="st-total">0</span> games</div>
     </div>
-    <div class="podium" id="podium"></div>
-    <div class="table-card">
-      <div class="table-scroll">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col" class="c-rank">#</th>
-              <th scope="col">Player</th>
-              <th scope="col" class="c-c" title="Played">P</th>
-              <th scope="col" class="c-c" title="Won">W</th>
-              <th scope="col" class="c-c" title="Drawn">D</th>
-              <th scope="col" class="c-c" title="Lost">L</th>
-              <th scope="col" class="c-form">Last 5</th>
-              <th scope="col" class="c-pts accent">Pts</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="groups" id="groups"></div>
+    <p class="group-note">Top two of each group advance. Ties: points, head-to-head, wins, then lots.</p>
   </div>
 </section>
 
-<!-- BRACKET (play only, knockout) -->
+<!-- BRACKET (play only) -->
 <section id="bracket" class="standings bracket" data-only="play">
   <div class="wrap section-pad">
     <div class="standings-head">
@@ -280,7 +262,7 @@
         <div class="kicker">§ 02 / Knockout</div>
         <h2>The bracket<span class="accent">.</span></h2>
       </div>
-      <div class="updated"><span class="live"></span>lose and you're out</div>
+      <div class="updated"><span class="live"></span>semis, final, third place · no draws</div>
     </div>
     <div class="br-scroll"><div class="br-cols" id="bracket-cols"></div></div>
   </div>

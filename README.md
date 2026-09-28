@@ -1,6 +1,6 @@
 # Q hub Friendly Chess Tournament
 
-A low-maintenance tournament site for the Q hub coworking space (formerly Anahit) in Yerevan. People register from a QR flyer, the site decides the format from the headcount, pairs players, emails them, lets them report results, and shows live standings or a bracket. The organizer presses one button to close registration and only gets involved in disputes.
+A low-maintenance tournament site for the Q hub coworking space (formerly Anahit) in Yerevan. People register from a QR flyer, the site draws two random groups, pairs players, emails them, lets them report results, and shows live group tables and a knockout bracket. The organizer presses one button to close registration and only gets involved in disputes.
 
 | What | Where |
 |---|---|
@@ -14,7 +14,7 @@ A low-maintenance tournament site for the Q hub coworking space (formerly Anahit
 ## How the tournament works
 
 1. **Registration.** Form on the landing page: name, company (or "Freelance"), email, optional photo (camera or file, shrunk to 240 px in the browser). Duplicate emails are refused. Player gets a welcome email with a personal link.
-2. **Close.** Organizer presses "Close registration & create pairings" on `/admin`. Fewer than `KNOCKOUT_FROM` (12) players gives a round robin (everyone plays everyone once, 3/1/0 points). 12 or more gives single-elimination knockout with byes. Every player gets one pairing email with opponent(s), their email, and a report link per game.
+2. **Close.** Organizer presses "Close registration & create pairings" on `/admin` (needs 4+ players). Players are drawn at random into groups A and B (seed stored in settings), each group is a single round robin (3/1/0). Every player gets one pairing email with all group opponents, their emails, and a report link per game. When both groups are complete the site creates the semi-finals (A1 vs B2, B1 vs A2) and emails the four; when both semis are confirmed it creates the final and the third-place game. No draws from the semis on (replay until decided). Group ties: points, head-to-head, wins, then the stored lots order.
 3. **Play.** Players arrange games themselves by replying to the pairing email. Either player reports won/lost/draw from their link. The opponent gets a confirm-or-dispute email. Silence for `CONFIRM_HOURS` (48) counts as confirmed. Disputes email the organizer and show on `/admin`, where any result can be set.
 4. **Knockout rounds** advance automatically when a round is fully confirmed. The final sets a champion and switches the site to a "done" state.
 
@@ -23,7 +23,7 @@ Phase never changes by clock. The countdown is informational; the organizer deci
 ## Architecture
 
 - **Frontend**: plain HTML/CSS/JS in `web/`, no build step. One page (`index.html`) switches sections by phase via `data-only="registration|play"` attributes. `game.html` is the player's page (report/confirm), `admin.html` the organizer page. Asset links carry `?v=` versions; `web/_headers` makes HTML no-cache.
-- **API**: Cloudflare Pages Functions in `functions/api/**` (Workers runtime). Pure tournament logic in `functions/_lib/tournament.js` (pairings, bracket, standings, validation), email in `functions/_lib/mail.js`, auto-confirm and knockout advancement in `functions/_lib/sweep.js`.
+- **API**: Cloudflare Pages Functions in `functions/api/**` (Workers runtime). Pure tournament logic in `functions/_lib/tournament.js` (group split, pairings, tiebreak table, semis/final, validation), email in `functions/_lib/mail.js`, auto-confirm and stage advancement in `functions/_lib/sweep.js`.
 - **Database**: Cloudflare D1 (SQLite) `anahit-chess`, bound as `DB`. Schema in `schema.sql`: `settings`, `players`, `games`. Results are stored from p1's perspective: `1-0`, `0-1`, `1/2`.
 - **Email**: Resend REST API. Sender `Q hub Chess <chess@pouyakarimi.com>`. Domain `pouyakarimi.com` verified in Resend (region eu-west-1). Cloudflare Email Routing forwards `chess@pouyakarimi.com` to the organizer's Gmail.
 - **Homepage**: `homepage/` is a separate Cloudflare Worker with static assets, custom domains `pouyakarimi.com` and `www`.
@@ -36,7 +36,7 @@ Emails and tokens never leave the server in public responses.
 
 ### Configuration
 
-`wrangler.toml` `[vars]`: `SITE_URL`, `MAIL_FROM`, `ADMIN_EMAIL`, `KNOCKOUT_FROM`, `CONFIRM_HOURS`, `CLOSE_DATE`, `START_DATE`.
+`wrangler.toml` `[vars]`: `SITE_URL`, `MAIL_FROM`, `ADMIN_EMAIL`, `CONFIRM_HOURS`, `CLOSE_DATE`, `START_DATE`.
 Secrets on the Pages project: `RESEND_API_KEY`, `ADMIN_KEY`. Set with `npx wrangler pages secret put NAME --project-name qhub-chess`.
 
 ## Working on another machine
@@ -65,7 +65,15 @@ npx wrangler d1 execute anahit-chess --local --file schema.sql   # once, creates
 npx wrangler pages dev --port 8788                               # http://localhost:8788
 ```
 
-To try the knockout path locally with few players: `npx wrangler pages dev --port 8788 --binding KNOCKOUT_FROM=2`.
+Local end-to-end run with mock data (no real emails: without `RESEND_API_KEY` in `.dev.vars` every email is captured in the `outbox` table and shown on `/admin`):
+
+1. `npm run seed` resets the local D1 with 12 players (tokens `tok-01`..`tok-12`, player pages at `/game?t=tok-05`).
+2. `npx wrangler pages dev --port 8788`, open `http://localhost:8788/admin`.
+3. "Announce format change" sends the one-off email to all 12; read them in the Outbox box.
+4. "Close registration" draws the groups and sends the pairing emails; the site shows two tables.
+5. Report and confirm from two player pages, or set results from the admin Games table. Semis, final, third place and the champion email follow automatically.
+
+Existing databases need `migrations/0002-groups.sql` once (`npx wrangler d1 execute anahit-chess --remote --file migrations/0002-groups.sql`).
 
 ## Deploying
 

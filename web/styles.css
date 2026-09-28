@@ -294,8 +294,12 @@ h1 { font-size: clamp(44px, 9vw, 108px); line-height: 0.9; text-wrap: balance; m
 }
 
 /* FORMAT SWITCH: standings vs bracket */
-[data-format="ko"] #standings { display: none !important; }
-body:not([data-format="ko"]) #bracket { display: none !important; }
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.group-title { font-family: var(--grot); font-weight: 700; font-size: 22px; letter-spacing: -0.02em; margin-bottom: 12px; }
+.group-title span { color: var(--orange); }
+.group-note { margin-top: 20px; font-size: 12px; color: rgba(239,230,210,0.7); }
+.table tbody tr.top .rank-badge { background: var(--orange); color: var(--ink); }
+.br-sub { margin-top: 18px; }
 
 /* FORM ERROR */
 .form-error { margin-top: 12px; padding: 8px 10px; background: var(--orange); color: var(--ink); font-size: 12.5px; line-height: 1.4; border: 1.5px solid var(--ink); }

@@ -39,9 +39,9 @@
     const el = document.createElement('div');
     el.className = 'g' + (g.id === focusId ? ' focus' : '');
     const opp = g.opponent;
-    const ko = data.format === 'ko';
+    const ko = g.round >= 2;
     const round = document.createElement('div'); round.className = 'g-round';
-    round.textContent = ko ? `Round ${g.round}` : `Game #${g.id}`;
+    round.textContent = g.round === 1 ? `Group game #${g.id}` : g.round === 2 ? 'Semi-final' : g.slot === 0 ? 'Final' : 'Third place';
     const vs = document.createElement('div'); vs.className = 'g-vs';
     vs.textContent = opp ? `vs ${opp.name}` : 'Bye';
     const sub = document.createElement('div'); sub.className = 'g-sub';
@@ -81,6 +81,7 @@
     } else if (g.canReport) {
       actions.append(btn('I won', 'btn-orange', () => post('/api/report', { result: 'win' })));
       if (!ko) actions.append(btn('Draw', 'btn-line', () => post('/api/report', { result: 'draw' })));
+      if (ko) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = 'No draws in the knockout: a drawn game is replayed until someone wins.'; el.appendChild(h); }
       actions.append(btn('I lost', 'btn-dark', () => post('/api/report', { result: 'loss' })));
     }
     if (actions.children.length) el.appendChild(actions);
