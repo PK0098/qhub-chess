@@ -4,8 +4,26 @@
     {
       "name": "web",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "web"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "web"
+      ],
       "port": 8765
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "pages",
+        "dev",
+        "--port",
+        "8788"
+      ],
+      "port": 8788
     }
   ]
 }

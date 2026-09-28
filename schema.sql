@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS players (
   email TEXT NOT NULL UNIQUE COLLATE NOCASE,
   photo TEXT,
   token TEXT NOT NULL UNIQUE,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  grp TEXT
 );
 CREATE TABLE IF NOT EXISTS games (
   id INTEGER PRIMARY KEY,
@@ -22,5 +23,14 @@ CREATE TABLE IF NOT EXISTS games (
   reported_by INTEGER,
   reported_at TEXT,
   confirmed_at TEXT
+);
+-- Dev-only: emails are captured here when RESEND_API_KEY is not set.
+CREATE TABLE IF NOT EXISTS outbox (
+  id INTEGER PRIMARY KEY,
+  to_addr TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  html TEXT NOT NULL,
+  text TEXT,
+  created_at TEXT NOT NULL
 );
 INSERT OR IGNORE INTO settings (key, value) VALUES ('phase', 'registration');
