@@ -84,7 +84,7 @@
   $('close-btn').onclick = async () => {
     if (!confirm('Close registration now? This draws the two groups, creates all group games and emails every player. It cannot be undone.')) return;
     $('close-btn').disabled = true;
-    try { const r = await api('close', {}); msg($('msg'), `Closed. ${r.players} players: Petrosian ${r.groups.P}, Aronian ${r.groups.A}. ${r.games} games created. Emails sent.`, 'ok'); }
+    try { const r = await api('close', {}); msg($('msg'), `Closed. ${r.players} players: Petrosian ${r.groups.P}, Aronian ${r.groups.A}. ${r.games} games created. Emails sent: ${r.mail.sent}.${r.mail.failed.length ? ' FAILED for: ' + esc(r.mail.failed.join(', ')) : ''}`, r.mail.failed.length ? 'bad' : 'ok'); }
     catch (e) { msg($('msg'), esc(e.message), 'bad'); }
     load();
   };
@@ -92,7 +92,7 @@
     const again = $('announce-btn').textContent.endsWith('again');
     if (!confirm(`Send the format-change email to every registered player${again ? ' AGAIN' : ''}?`)) return;
     $('announce-btn').disabled = true;
-    try { const r = await api('announce', { force: again }); msg($('msg'), `Announcement sent to ${r.sent} players.`, 'ok'); }
+    try { const r = await api('announce', { force: again }); msg($('msg'), r.failed.length ? `Sent to ${r.sent}. FAILED for: ${esc(r.failed.join(', '))}` : `Announcement sent to ${r.sent} players.`, r.failed.length ? 'bad' : 'ok'); }
     catch (e) { msg($('msg'), esc(e.message), 'bad'); }
     load();
   };

@@ -30,6 +30,19 @@ export async function sendMail(env, { to, subject, html, text, replyTo }) {
   }
 }
 
+// Resend allows 2 requests per second. Send a batch one at a time with a
+// gap, and report who failed, instead of firing everything at once.
+// items: [{ to, subject, html, text, replyTo }]. Returns { sent, failed: [to] }.
+export async function sendMany(env, items) {
+  const failed = [];
+  for (let i = 0; i < items.length; i++) {
+    if (i > 0 && env.RESEND_API_KEY) await new Promise((r) => setTimeout(r, 600));
+    const r = await sendMail(env, items[i]);
+    if (!r.ok) failed.push(items[i].to);
+  }
+  return { sent: items.length - failed.length, failed };
+}
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const first = (name) => String(name || '').trim().split(/\s+/)[0];
 const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }); } catch { return iso; } };

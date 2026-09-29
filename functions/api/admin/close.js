@@ -27,6 +27,6 @@ export const onRequestPost = handle(async ({ request, env }) => {
   await setSetting(db, 'phase', 'play');
 
   const created = await listGames(db);
-  await emailPairings(db, env, created, 'group');
-  return json({ ok: true, format: 'groups', players: players.length, groups: { P: P.length, A: A.length }, games: created.length });
+  const mail = await emailPairings(db, env, created, 'group');
+  return json({ ok: true, format: 'groups', players: players.length, groups: { P: P.length, A: A.length }, games: created.length, mail });
 });

@@ -1,6 +1,6 @@
 import { groupTable, semiPairings, finalPairings, winnerOf } from './tournament.js';
 import { getSetting, setSetting, listGames, listPlayers, nowIso } from './db.js';
-import { sendMail, templates } from './mail.js';
+import { sendMany, templates } from './mail.js';
 
 // Auto-confirm stale reports, then create the next stage (semis, final +
 // third place) when the previous one is complete, emailing the players
@@ -61,7 +61,7 @@ export async function advanceGroups(db, env) {
     await setSetting(db, 'champion', champion);
     const champ = players.find((p) => p.id === champion);
     const t = templates.champion(env, { champion: champ });
-    await Promise.all(players.map((p) => sendMail(env, { to: p.email, ...t })));
+    await sendMany(env, players.map((p) => ({ to: p.email, ...t })));
   }
   if (allConfirmed(round(3))) await setSetting(db, 'phase', 'done');
   return { advanced: [] };
@@ -80,10 +80,9 @@ export async function emailPairings(db, env, games, stage) {
       perPlayer.get(me).push({ id: g.id, opponent: { name: opp.name, company: opp.company, email: opp.email } });
     }
   }
-  await Promise.all([...perPlayer.entries()].map(([id, list]) => {
+  const items = [...perPlayer.entries()].map(([id, list]) => {
     const player = byId.get(id);
-    if (!player) return null;
-    const t = templates.pairings(env, { player, stage, games: list });
-    return sendMail(env, { to: player.email, ...t });
-  }));
+    return player ? { to: player.email, ...templates.pairings(env, { player, stage, games: list }) } : null;
+  }).filter(Boolean);
+  return sendMany(env, items);
 }
