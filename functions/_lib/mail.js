@@ -106,7 +106,7 @@ export const templates = {
     return {
       subject: `Format update: two groups, then a knockout`,
       html: layout(`Format update.`, `
-        <p>Hi ${esc(first(player.name))}, small update from tournament HQ (Pouya's desk). The format no longer depends on how many people sign up. It's now fixed, whatever the headcount:</p>
+        <p>Hi ${esc(first(player.name))}, small update from tournament HQ. The format no longer depends on how many people sign up. It's now fixed, whatever the headcount:</p>
         <ol style="padding-left:20px;margin:0 0 14px">
           <li style="margin:6px 0">A random draw sorts everyone into two groups: <strong>Group Petrosian</strong> and <strong>Group Aronian</strong>.</li>
           <li style="margin:6px 0">You play everyone in your group once. Win 3, draw 1, loss 0.</li>
