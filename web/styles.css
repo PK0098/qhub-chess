@@ -312,9 +312,6 @@ body.mock .mock-only { display: block; }
 .btn-line { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
 .btn-line:hover { background: var(--ink); color: var(--cream); }
 
-/* HERO (play) */
-.btn-text { padding: 12px 18px; color: var(--cream); text-decoration: underline; text-underline-offset: 4px; }
-.btn-text:hover { color: var(--orange); }
 
 /* STAGES (play rules) */
 .stages { margin: 40px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 2px; background: var(--ink); border: 2px solid var(--ink); }
