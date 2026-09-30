@@ -99,6 +99,8 @@ export const templates = {
     }[stage];
     const replyTo = games.map((g) => g.opponent.email);
     const howTo = `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets live in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0. Snacks optional but encouraged.</p>`;
+    const tgUrl = 'https://t.me/+_gfRxTIi3tBkNGFk';
+    const telegram = stage === 'group' ? `<p>Can't find your opponent, or no reply yet? Join the tournament Telegram channel: <a href="${tgUrl}" style="color:#2b3f6b">${tgUrl}</a>. Everyone can hang out there, so it's the easiest way to track down your opponents and set up games.</p>` : '';
     const noDraw = stage === 'group' ? '' : `<p><strong>No draws from here on.</strong> If a game is drawn, play again until someone cracks, then report that result.</p>`;
     const reporting = `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation, so don't ghost your opponent.</p>`;
     return {
@@ -106,11 +108,12 @@ export const templates = {
       replyTo: replyTo.length === 1 ? replyTo[0] : undefined,
       html: layout(title, `${intro}
         ${howTo}
+        ${telegram}
         <ul style="padding-left:18px;margin:0">${rows}</ul>
         ${noDraw}
         ${reporting}
         ${button(meLink(env, player.token), 'Your player page')}`),
-      text: `${title}\n${games.map((g) => `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}`).join('\n')}${stage === 'group' ? '' : '\nNo draws: a drawn game is replayed until someone wins.'}\nYour page: ${meLink(env, player.token)}`,
+      text: `${title}\n${games.map((g) => `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}`).join('\n')}${stage === 'group' ? `\nCan't find your opponent? Join the Telegram channel: ${tgUrl}` : '\nNo draws: a drawn game is replayed until someone wins.'}\nYour page: ${meLink(env, player.token)}`,
     };
   },
 
