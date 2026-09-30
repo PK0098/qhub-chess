@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body { margin: 0; background: #efe6d2; color: #1c1a17; font-family: 'IBM Plex Mono', ui-monospace, monospace; -webkit-font-smoothing: antialiased; }
+    a { color: #2b3f6b; text-decoration: none; }
+    a:hover { color: #1c1a17; }
+    * { box-sizing: border-box; }
+    button { font-family: inherit; }
+    @keyframes wobble { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  </style>
+</helmet>
+
+<div data-screen-label="Chess tournament — groups and knockouts" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #1c1a17; background: #efe6d2; overflow-x: clip;">
+
+  <sc-if value="{{ inDevice }}" hint-placeholder-val="{{ false }}"><div style="height: 54px; background: #1c1a17;"></div></sc-if>
+
+  <!-- NAV -->
+  <nav style="position: sticky; top: 0; z-index: 20; background: #1c1a17; color: #efe6d2; border-bottom: 3px solid #e0552b;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <a href="#top" style="display: flex; align-items: center; gap: 10px; color: #efe6d2; flex-shrink: 0;">
+        <span style="display: grid; grid-template-columns: repeat(2, 10px); grid-template-rows: repeat(2, 10px);"><span style="background: #efe6d2;"></span><span style="background: #e0552b;"></span><span style="background: #e0552b;"></span><span style="background: #efe6d2;"></span></span>
+        <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em;">QHUB_CHESS</span></sc-if>
+      </a>
+      <div style="display: flex; gap: 0; min-width: 0;">
+        <a href="#rules" style="padding: 8px {{ navPad }}; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;"><sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">[1] </sc-if>Rules</a>
+        <a href="#groups" style="padding: 8px {{ navPad }}; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;"><sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">[2] </sc-if>Groups</a>
+        <a href="#bracket" style="padding: 8px {{ navPad }}; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;"><sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">[3] </sc-if>Bracket</a>
+        <a href="#players" style="padding: 8px {{ navPad }}; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;"><sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">[4] </sc-if>Players</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="top" data-screen-label="Hero" style="position: relative; overflow: hidden; background: #14110e url('assets/hero-simul.png') center 22% / cover no-repeat; color: #efe6d2; min-height: min(88vh, 820px); display: flex; align-items: flex-end;">
+    <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(20,17,14,0.97) 0%, rgba(20,17,14,0.75) 40%, rgba(20,17,14,0.1) 72%, rgba(20,17,14,0.3) 100%);"></div>
+    <div aria-hidden="true" style="position: absolute; top: 20px; left: 20px; right: 20px; font-size: 12px; line-height: 1.5; letter-spacing: 0.06em; color: rgba(239,230,210,0.75); max-width: 60ch;">fig. 1 — Samuel Reshevsky, age 8, playing a simultaneous exhibition against a room of adult club players. France, 1920. He won.</div>
+    <div aria-hidden="true" style="position: absolute; bottom: 14px; right: 20px; font-size: 11px; letter-spacing: 0.08em; color: rgba(239,230,210,0.55); text-align: right; white-space: nowrap;">40.1997° N, 44.4898° E</div>
+    <div style="position: relative; width: 100%; max-width: 1160px; margin: 0 auto; padding: clamp(160px, 28vw, 260px) 20px clamp(40px, 6vw, 64px);">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 10px; max-width: 100%; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 10px; border: 1px solid rgba(239,230,210,0.5); margin-bottom: 20px;"><span style="width: 8px; height: 8px; background: #e0552b; display: inline-block; flex-shrink: 0;"></span><span style="flex: 1; min-width: 0; line-height: 1.4;">Autumn 2026 · Q Hub, Yerevan · {{ stageLabel }}</span></div>
+          <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(44px, 9vw, 108px); line-height: 0.9; letter-spacing: -0.04em; text-wrap: balance; max-width: 12ch;">Q Hub Friendly <span style="color: transparent; -webkit-text-stroke: 2px #efe6d2;">Chess</span> Tournament<span style="color: #e0552b;">.</span></h1>
+          <p style="margin: 22px 0 0; font-size: clamp(15px, 1.8vw, 18px); line-height: 1.55; color: rgba(239,230,210,0.9); max-width: 44ch;">May the best pawn win.<br>Ten minutes across a board is the fastest way to meet someone from another team at Q Hub. Two groups, four knockout games, one champion.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px;">
+            <a href="#groups" style="display: inline-flex; align-items: center; gap: 10px; min-height: 50px; padding: 12px 24px; background: #e0552b; color: #1c1a17; font-weight: 600; font-size: 15px; border: 2px solid #e0552b; box-shadow: 4px 4px 0 #efe6d2; transition: transform .12s ease, box-shadow .12s ease;" style-hover="transform: translate(2px, 2px); box-shadow: 2px 2px 0 #efe6d2;">See groups <span aria-hidden="true">→</span></a>
+            <a href="#bracket" style="display: inline-flex; align-items: center; min-height: 50px; padding: 12px 24px; border: 2px solid #efe6d2; color: #efe6d2; font-weight: 600; font-size: 15px; transition: background .12s ease, color .12s ease;" style-hover="background: #efe6d2; color: #1c1a17;">Bracket</a>
+            <a href="#rules" style="display: inline-flex; align-items: center; min-height: 50px; padding: 12px 18px; color: #efe6d2; font-weight: 600; font-size: 15px; text-decoration: underline; text-underline-offset: 4px;" style-hover="color: #e0552b;">Rules</a>
+          </div>
+        </div>
+        <div style="flex-shrink: 0; width: 132px; height: 132px; border-radius: 999px; background: #efe6d2; color: #1c1a17; display: grid; place-items: center; text-align: center; animation: wobble 6s ease-in-out infinite; border: 3px solid #1c1a17; box-shadow: 0 0 0 3px #efe6d2;">
+          <div><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -0.04em;">10+0</div><div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;">no increment<br>no mercy</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div onPointerDown="{{ tickerDown }}" onPointerMove="{{ tickerMove }}" onPointerUp="{{ tickerUp }}" onPointerCancel="{{ tickerUp }}" title="Drag me" style="background: #e0552b; color: #1c1a17; border-top: 2px solid #1c1a17; border-bottom: 2px solid #1c1a17; overflow: hidden; padding: 10px 0; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: grab; touch-action: pan-y; user-select: none;">{{ ticker }}</div>
+
+  <!-- STAT STRIP -->
+  <div style="max-width: 1160px; margin: 0 auto; padding: 0 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-left: 1px solid #1c1a17; border-right: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17;">
+      <div style="padding: 20px 16px; border-right: 1px solid #1c1a17;"><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -0.04em;">{{ playerCount }}</div><div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; color: #5c5548;">players</div></div>
+      <div style="padding: 20px 16px; border-right: 1px solid #1c1a17;"><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -0.04em;">2</div><div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; color: #5c5548;">groups</div></div>
+      <div style="padding: 20px 16px; border-right: 1px solid #1c1a17;"><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -0.04em;"><span style="color: #e0552b;">{{ gamesPlayed }}</span>/{{ gamesTotal }}</div><div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; color: #5c5548;">games played</div></div>
+      <div style="padding: 20px 16px;"><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -0.04em;">0</div><div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; color: #5c5548;">grandmasters</div></div>
+    </div>
+  </div>
+
+  <!-- RULES -->
+  <section id="rules" data-screen-label="Rules" style="position: relative; background: #efe6d2;">
+    <div aria-hidden="true" style="position: absolute; right: -60px; top: 40px; font-size: 420px; line-height: 1; color: #1c1a17; opacity: 0.05; pointer-events: none; user-select: none;">♞</div>
+    <div style="position: relative; max-width: 1160px; margin: 0 auto; padding: clamp(56px, 8vw, 96px) 20px;">
+      <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #e0552b; margin-bottom: 14px;">§ 01 / How it works</div>
+      <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(38px, 5.5vw, 64px); line-height: 0.95; letter-spacing: -0.04em;">The rules,<br><span style="color: transparent; -webkit-text-stroke: 1.5px #1c1a17;">briefly.</span></h2>
+      <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.6; color: #5c5548; max-width: 46ch; text-wrap: pretty;">Three stages. Twelve players become four, four become one.</p>
+
+      <!-- FORMAT JOURNEY -->
+      <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 2px; background: #1c1a17; border: 2px solid #1c1a17;">
+        <sc-for list="{{ stages }}" as="s" hint-placeholder-count="3">
+          <div style="padding: 22px 20px 24px; background: {{ s.bg }}; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+              <span style="font-size: 12px; letter-spacing: 0.1em; font-weight: 600;">STAGE {{ s.n }}</span>
+              <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; padding: 3px 8px; border: 1.5px solid #1c1a17; background: {{ s.chipBg }}; color: {{ s.chipFg }};">{{ s.chip }}</span>
+            </div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px;">
+              <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.03em; line-height: 1;">{{ s.title }}</div>
+              <div style="font-size: 30px; line-height: 1;">{{ s.piece }}</div>
+            </div>
+            <div style="font-size: 14px; line-height: 1.55; color: #3d3831; text-wrap: pretty;">{{ s.body }}</div>
+            <div style="margin-top: auto; padding-top: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -0.01em;">{{ s.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: clamp(24px, 4vw, 48px); align-items: start;">
+        <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); border-top: 1px solid #1c1a17; border-left: 1px solid #1c1a17;">
+          <li style="padding: 22px 20px; border-right: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; background: #faf6ec;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;"><span style="font-size: 12px; letter-spacing: 0.1em; color: #e0552b; font-weight: 600;">1.</span><span style="font-size: 28px; line-height: 1;">♛</span></div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin-bottom: 6px;">Ten minutes each</div>
+            <div style="font-size: 14px; line-height: 1.55; color: #3d3831; text-wrap: pretty;">Every game, groups and knockouts alike, is played with a 10-minute timer per player (10+0, no increment).</div>
+          </li>
+          <li style="padding: 22px 20px; border-right: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; background: #efe6d2;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;"><span style="font-size: 12px; letter-spacing: 0.1em; color: #e0552b; font-weight: 600;">2.</span><span style="font-size: 28px; line-height: 1;">♝</span></div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin-bottom: 6px;">Play nice</div>
+            <div style="font-size: 14px; line-height: 1.55; color: #3d3831; text-wrap: pretty;">Standard chess rules apply. Touch-move, be nice, have fun.</div>
+          </li>
+          <li style="padding: 22px 20px; border-right: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; background: #efe6d2;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;"><span style="font-size: 12px; letter-spacing: 0.1em; color: #e0552b; font-weight: 600;">3.</span><span style="font-size: 28px; line-height: 1;">♞</span></div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin-bottom: 6px;">Your game, your schedule</div>
+            <div style="font-size: 14px; line-height: 1.55; color: #3d3831; text-wrap: pretty;">Once pairings are out you get an email with your opponent's address and a report link. Reply to agree a time and a corner of Q Hub, play, then report the result. If you already know each other, skip the emails and just play.</div>
+          </li>
+          <li style="padding: 22px 20px; border-right: 1px solid #1c1a17; border-bottom: 1px solid #1c1a17; background: #1c1a17; color: #efe6d2; display: flex; flex-direction: column; justify-content: flex-end; min-height: 160px;">
+            <div style="font-size: 12px; letter-spacing: 0.1em; color: #e0552b; font-weight: 600; margin-bottom: 8px;">4. (unofficial)</div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; line-height: 1.15;">Losing to the intern is not a bug.<br>It's a feature.</div>
+          </li>
+        </ol>
+        <div style="padding: 24px; background: #1c1a17; color: #efe6d2; border: 2px solid #1c1a17; box-shadow: 6px 6px 0 #e0552b;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em;">Need a clock?</div>
+          <p style="margin: 6px 0 18px; font-size: 14px; line-height: 1.55; color: rgba(239,230,210,0.8);">Grab the free Chess.com clock app. Set it to <span style="color: #e0552b; font-weight: 600;">10 + 0</span>.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <a href="https://apps.apple.com/us/app/chess-clock-by-chess-com/id858039162" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 18px 8px 14px; border: 1.5px solid #efe6d2; color: #efe6d2;" style-hover="background: #efe6d2; color: #1c1a17;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7 0 0-2.7-1-2.7-4.1zM14.1 5.7c.6-.8 1.1-1.9.9-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1.1.1 2.2-.5 2.8-1.3z"/></svg>
+              <span style="display: flex; flex-direction: column; line-height: 1.1; white-space: nowrap;"><span style="font-size: 10px; letter-spacing: 0.04em;">Download on the</span><span style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700;">App Store</span></span>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.chess.clock&hl=en" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 18px 8px 14px; border: 1.5px solid #efe6d2; color: #efe6d2;" style-hover="background: #efe6d2; color: #1c1a17;">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#34a853" d="M3.6 2.4 13.8 12 3.6 21.6c-.4-.2-.6-.7-.6-1.2V3.6c0-.5.2-1 .6-1.2z"/><path fill="#fbbc04" d="M17.2 8.6 20.4 10.4c1 .6 1 1.6 0 2.2l-3.2 1.8L13.8 12z"/><path fill="#4285f4" d="M3.6 2.4c.3-.2.8-.2 1.3.1l12.3 6.1L13.8 12z"/><path fill="#ea4335" d="M13.8 12l3.4 3.4-12.3 6.1c-.5.3-1 .3-1.3.1z"/></svg>
+              <span style="display: flex; flex-direction: column; line-height: 1.1; white-space: nowrap;"><span style="font-size: 10px; letter-spacing: 0.04em;">Get it on</span><span style="font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700;">Google Play</span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div aria-hidden="true" style="height: 24px; background: repeating-conic-gradient(#1c1a17 0 25%, #efe6d2 0 50%) 0 0 / 48px 48px;"></div>
+
+  <!-- GROUPS -->
+  <section id="groups" data-screen-label="Groups" style="position: relative; background: #1c1a17; color: #efe6d2;">
+    <div style="position: relative; max-width: 1160px; margin: 0 auto; padding: clamp(56px, 8vw, 96px) 20px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px; margin-bottom: 32px;">
+        <div>
+          <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #e0552b; margin-bottom: 14px;">§ 02 / Group stage</div>
+          <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(38px, 5.5vw, 64px); line-height: 0.95; letter-spacing: -0.04em;">Groups<span style="color: #e0552b;">.</span></h2>
+          <p style="margin: 16px 0 0; font-size: 15px; line-height: 1.6; color: rgba(239,230,210,0.75); max-width: 48ch; text-wrap: pretty;">Named after the two Armenians every chess player knows. Everyone plays everyone in their group once. Top two go through.</p>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+          <div role="tablist" style="display: inline-flex; border: 1.5px solid #efe6d2;">
+            <button type="button" role="tab" onClick="{{ showTable }}" style="min-height: 40px; padding: 8px 16px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; background: {{ tableBtnBg }}; color: {{ tableBtnFg }};">Table</button>
+            <button type="button" role="tab" onClick="{{ showCross }}" style="min-height: 40px; padding: 8px 16px; border: none; border-left: 1.5px solid #efe6d2; font-size: 13px; font-weight: 600; cursor: pointer; background: {{ crossBtnBg }}; color: {{ crossBtnFg }};">Crosstable</button>
+          </div>
+          <div style="font-size: 13px; color: rgba(239,230,210,0.7); display: inline-flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 999px; background: #7dc46a; display: inline-block;"></span>updated today · {{ groupGamesPlayed }}/30 group games</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px;">
+        <sc-for list="{{ groupPanels }}" as="g" hint-placeholder-count="2">
+          <div style="background: #faf6ec; color: #1c1a17; border: 2px solid #efe6d2; box-shadow: 8px 8px 0 {{ g.accent }}; min-width: 0;">
+            <div style="padding: 18px 20px; border-bottom: 2px solid #1c1a17; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+              <div style="min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center; background: {{ g.accent }}; border: 1.5px solid #1c1a17; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px;">{{ g.id }}</span>
+                  <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.05;">{{ g.name }}</span>
+                </div>
+                <div style="font-size: 12px; line-height: 1.5; color: #5c5548; margin-top: 10px; text-wrap: pretty;">{{ g.note }}</div>
+              </div>
+              <div style="font-size: 38px; line-height: 1; flex-shrink: 0;">{{ g.piece }}</div>
+            </div>
+
+            <sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+              <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                  <thead>
+                    <tr style="background: #1c1a17; color: #efe6d2; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;">
+                      <th scope="col" style="text-align: left; font-weight: 600; padding: 10px 6px 10px 16px; width: 44px;">#</th>
+                      <th scope="col" style="text-align: left; font-weight: 600; padding: 10px 6px;">Player</th>
+                      <th scope="col" style="text-align: center; font-weight: 600; padding: 10px 4px;" title="Played">P</th>
+                      <th scope="col" style="text-align: center; font-weight: 600; padding: 10px 4px;" title="Won">W</th>
+                      <th scope="col" style="text-align: center; font-weight: 600; padding: 10px 4px;" title="Drawn">D</th>
+                      <th scope="col" style="text-align: center; font-weight: 600; padding: 10px 4px;" title="Lost">L</th>
+                      <th scope="col" style="text-align: right; font-weight: 600; padding: 10px 16px 10px 6px; color: #e0552b;">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                      <tr style="border-top: 1px solid rgba(28,26,23,0.12); border-bottom: {{ r.sep }}; background: {{ r.rowBg }};">
+                        <td style="padding: 9px 6px 9px 16px;"><span style="display: inline-grid; place-items: center; width: 26px; height: 26px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; background: {{ r.rankBg }}; border: {{ r.rankBorder }};">{{ r.rank }}</span></td>
+                        <td style="padding: 9px 6px; font-weight: 600; white-space: nowrap;">
+                          <span style="display: inline-flex; align-items: center; gap: 8px;">
+                            <span style="width: 28px; height: 28px; border-radius: 999px; flex-shrink: 0; display: grid; place-items: center; font-size: 10px; font-weight: 600; background: {{ r.avatarBg }}; border: 1.5px solid #1c1a17;">{{ r.initials }}</span>
+                            <span>{{ r.name }}</span>
+                            <sc-if value="{{ r.q }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; letter-spacing: 0.08em; padding: 1px 5px; border: 1px solid #1c1a17; background: {{ g.accent }};">SF</span></sc-if>
+                          </span>
+                        </td>
+                        <td style="padding: 9px 4px; text-align: center; color: #5c5548;">{{ r.pl }}</td>
+                        <td style="padding: 9px 4px; text-align: center;">{{ r.w }}</td>
+                        <td style="padding: 9px 4px; text-align: center;">{{ r.d }}</td>
+                        <td style="padding: 9px 4px; text-align: center;">{{ r.l }}</td>
+                        <td style="padding: 9px 16px 9px 6px; text-align: right; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.03em;">{{ r.pts }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCross }}" hint-placeholder-val="{{ false }}">
+              <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr style="background: #1c1a17; color: #efe6d2; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
+                      <th scope="col" style="text-align: left; font-weight: 600; padding: 10px 6px 10px 16px; width: 40px;">#</th>
+                      <th scope="col" style="text-align: left; font-weight: 600; padding: 10px 6px;">Player</th>
+                      <sc-for list="{{ g.cols }}" as="c" hint-placeholder-count="6">
+                        <th scope="col" style="text-align: center; font-weight: 600; padding: 10px 2px; width: 32px;">{{ c.n }}</th>
+                      </sc-for>
+                      <th scope="col" style="text-align: right; font-weight: 600; padding: 10px 16px 10px 6px; color: #e0552b;">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ g.cross }}" as="r" hint-placeholder-count="6">
+                      <tr style="border-top: 1px solid rgba(28,26,23,0.12); border-bottom: {{ r.sep }}; background: {{ r.rowBg }};">
+                        <td style="padding: 7px 6px 7px 16px;"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px; background: {{ r.rankBg }}; border: {{ r.rankBorder }};">{{ r.rank }}</span></td>
+                        <td style="padding: 7px 6px; font-weight: 600; white-space: nowrap;">{{ r.short }}</td>
+                        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="6">
+                          <td style="padding: 3px 2px; text-align: center;"><span style="display: inline-grid; place-items: center; width: 26px; height: 26px; font-size: 12px; font-weight: 600; background: {{ c.bg }}; color: {{ c.fg }}; border: {{ c.border }};">{{ c.t }}</span></td>
+                        </sc-for>
+                        <td style="padding: 7px 16px 7px 6px; text-align: right; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em;">{{ r.pts }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+
+            <div style="padding: 10px 16px; border-top: 1px solid rgba(28,26,23,0.15); font-size: 12px; color: #5c5548; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px;">
+              <span style="display: inline-flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; background: {{ g.accent }}; border: 1px solid #1c1a17; display: inline-block;"></span>Top 2 go to the semis</span>
+              <span>{{ g.playedLabel }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <div aria-hidden="true" style="height: 24px; background: repeating-conic-gradient(#1c1a17 0 25%, #efe6d2 0 50%) 24px 0 / 48px 48px;"></div>
+
+  <!-- BRACKET -->
+  <section id="bracket" data-screen-label="Bracket" style="position: relative; background: #efe6d2; overflow: hidden;">
+    <div aria-hidden="true" style="position: absolute; right: -60px; bottom: -80px; font-size: 420px; line-height: 1; color: #1c1a17; opacity: 0.05; pointer-events: none; user-select: none;">♚</div>
+    <div style="position: relative; max-width: 1160px; margin: 0 auto; padding: clamp(56px, 8vw, 96px) 20px;">
+      <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #e0552b; margin-bottom: 14px;">§ 03 / Knockouts</div>
+      <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(38px, 5.5vw, 64px); line-height: 0.95; letter-spacing: -0.04em;">The bracket<span style="color: #e0552b;">.</span></h2>
+      <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.6; color: #5c5548; max-width: 50ch; text-wrap: pretty;">Group winners face the other group's runner-up. {{ bracketNote }}</p>
+
+      <div style="margin-top: 44px; display: grid; grid-template-columns: {{ bCols }}; row-gap: 16px; column-gap: 0;">
+        <sc-for list="{{ matches }}" as="m" hint-placeholder-count="4">
+          <div style="grid-column: {{ m.col }}; grid-row: {{ m.row }}; margin-top: {{ m.mt }}; align-self: center; background: #faf6ec; border: 2px solid #1c1a17; box-shadow: 4px 4px 0 #1c1a17; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 2px solid #1c1a17; background: {{ m.headBg }}; color: #1c1a17; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">
+              <span>{{ m.label }}</span><span style="color: {{ m.statusFg }};">{{ m.status }}</span>
+            </div>
+            <sc-for list="{{ m.slots }}" as="s" hint-placeholder-count="2">
+              <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr) 24px; gap: 10px; align-items: center; padding: 10px 12px; border-top: {{ s.border }}; background: {{ s.bg }}; color: {{ s.fg }};">
+                <span style="height: 24px; display: grid; place-items: center; font-size: 11px; font-weight: 600; border: 1.5px solid currentColor;">{{ s.seed }}</span>
+                <div style="min-width: 0; opacity: {{ s.op }};">
+                  <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: {{ s.italic }};">{{ s.name }}</div>
+                  <div style="font-size: 11px; margin-top: 2px; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ s.sub }}</div>
+                </div>
+                <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; text-align: right; opacity: {{ s.op }};">{{ s.score }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+
+        <div aria-hidden="true" style="grid-column: 2; grid-row: 1 / 3; position: relative; display: {{ connDisplay }};">
+          <div style="position: absolute; top: calc(25% - 4px); bottom: calc(25% - 4px); left: 0; width: 50%; border: 2px solid #1c1a17; border-left: none;"></div>
+          <div style="position: absolute; top: 50%; left: 50%; right: 0; border-top: 2px solid #1c1a17;"></div>
+        </div>
+        <div aria-hidden="true" style="grid-column: 4; grid-row: 1 / 3; position: relative; display: {{ connDisplay }};">
+          <div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid #1c1a17;"></div>
+        </div>
+
+        <div style="grid-column: {{ champCol }}; grid-row: {{ champRow }}; margin-top: {{ champMt }}; align-self: center; background: #1c1a17; color: #efe6d2; border: 2px solid #1c1a17; box-shadow: 6px 6px 0 #e0552b; padding: 24px 18px; text-align: center; min-width: 0;">
+          <div style="font-size: 48px; line-height: 1; color: #d9a92f;">♔</div>
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 12px; color: rgba(239,230,210,0.7);">Champion</div>
+          <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1; margin-top: 6px; font-style: {{ champItalic }};">{{ champName }}</div>
+          <div style="font-size: 12px; line-height: 1.55; margin-top: 10px; color: rgba(239,230,210,0.75); text-wrap: pretty;">{{ champSub }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div aria-hidden="true" style="height: 24px; background: repeating-conic-gradient(#1c1a17 0 25%, #efe6d2 0 50%) 0 0 / 48px 48px;"></div>
+
+  <!-- PLAYERS -->
+  <section id="players" data-screen-label="Players" style="position: relative; background: #efe6d2; overflow: hidden;">
+    <div aria-hidden="true" style="position: absolute; left: -80px; bottom: -60px; font-size: 460px; line-height: 1; color: #1c1a17; opacity: 0.05; pointer-events: none; user-select: none;">♟</div>
+    <div style="position: relative; max-width: 1160px; margin: 0 auto; padding: clamp(56px, 8vw, 96px) 20px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px;">
+        <div>
+          <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #e0552b; margin-bottom: 14px;">§ 04 / The field</div>
+          <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(38px, 5.5vw, 64px); line-height: 0.95; letter-spacing: -0.04em;">The players<span style="color: #e0552b;">.</span></h2>
+          <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.6; color: #5c5548; max-width: 46ch; text-wrap: pretty;">{{ playerCount }} brave colleagues. Some of them know how the knight moves. Combined Elo: undisclosed.</p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+            <button type="button" onClick="{{ f.onClick }}" style="min-height: 40px; padding: 8px 14px; border: 1.5px solid #1c1a17; font-size: 13px; font-weight: 600; cursor: pointer; background: {{ f.bg }}; color: {{ f.fg }};">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 18px; margin-top: 44px;">
+        <sc-for list="{{ players }}" as="p" hint-placeholder-count="12">
+          <div style="background: #faf6ec; border: 2px solid #1c1a17; padding: 22px 16px 18px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; transform: rotate({{ p.tilt }}); transition: transform .18s ease, box-shadow .18s ease; box-shadow: 4px 4px 0 #1c1a17;" style-hover="transform: rotate(0deg) translateY(-4px); box-shadow: 6px 8px 0 #e0552b;">
+            <div style="position: absolute; top: 8px; left: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border: 1px solid #1c1a17; background: {{ p.accent }};">{{ p.gid }} · {{ p.groupShort }}</div>
+            <div style="position: absolute; top: 6px; right: 10px; font-size: 20px; line-height: 1;">{{ p.piece }}</div>
+            <div style="width: 76px; height: 76px; border-radius: 999px; display: grid; place-items: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; color: #1c1a17; background: {{ p.avatarBg }}; border: 2px solid #1c1a17; margin-top: 14px;">{{ p.initials }}</div>
+            <div>
+              <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; line-height: 1.15;">{{ p.name }}</div>
+              <sc-if value="{{ showOneLiners }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: #5c5548; text-wrap: pretty;">{{ p.tag }}</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: #1c1a17; color: #efe6d2; border-top: 3px solid #e0552b;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 40px 20px; text-align: center; font-size: 14px; color: rgba(239,230,210,0.85);">Organized with love by Pouya. <span style="color: #e0552b;">1-0</span></div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;stage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Group stage&quot;,&quot;Semifinals&quot;,&quot;Finished&quot;],&quot;default&quot;:&quot;Group stage&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tournament&quot;},&quot;groupGamesPlayed&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:10,&quot;min&quot;:0,&quot;max&quot;:15,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Tournament&quot;},&quot;showOneLiners&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Players&quot;},&quot;tickerSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:60,&quot;min&quot;:20,&quot;max&quot;:120,&quot;step&quot;:5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Hero&quot;}}">
+class Component extends DCLogic {
+  groups = [
+    { id: 'P', name: 'Group Petrosian', short: 'Petrosian', accent: '#e0552b', piece: '♜',
+      note: 'Tigran Petrosian, "Iron Tigran". 9th World Champion, 1963–69. Notoriously hard to beat.',
+      players: [
+        { name: 'Ani Petrosyan', tag: 'Plays the London System. Unironically.' },
+        { name: 'Narek Sargsyan', tag: 'Sicilian or nothing.' },
+        { name: 'Tigran Grigoryan', tag: 'Castles early. Regrets nothing.' },
+        { name: 'Hayk Mkrtchyan', tag: 'Learned chess last month. Dangerous.' },
+        { name: 'Aram Vardanyan', tag: 'Plays the bongcloud. Has won with it.' },
+        { name: 'Levon Galstyan', tag: 'Knight before bishop. Always.' },
+      ],
+      games: [[0,5,'1'],[1,4,'1'],[2,3,'='],[0,4,'1'],[5,3,'0'],[1,2,'1'],[0,3,'='],[4,2,'0'],[5,1,'0'],[0,2,'1'],[3,1,'0'],[4,5,'1'],[0,1,'0'],[2,5,'='],[3,4,'=']] },
+    { id: 'A', name: 'Group Aronian', short: 'Aronian', accent: '#d9a92f', piece: '♛',
+      note: 'Levon Aronian. World Cup winner 2005 and 2017, three Olympiad golds with Armenia.',
+      players: [
+        { name: 'Davit Hakobyan', tag: 'Reigning coffee-break champion.' },
+        { name: 'Lilit Avetisyan', tag: 'Has never lost on time. Has never finished a game either.' },
+        { name: 'Mariam Karapetyan', tag: 'Will offer a draw. Decline at your own risk.' },
+        { name: 'Sona Harutyunyan', tag: 'Queen’s Gambit, accepted.' },
+        { name: 'Anahit Hovhannisyan', tag: 'Endgame specialist (the snacks part).' },
+        { name: 'Nare Simonyan', tag: 'Here for the vibes and the en passant.' },
+      ],
+      games: [[0,5,'1'],[1,4,'1'],[2,3,'1'],[0,4,'='],[5,3,'='],[1,2,'='],[0,3,'1'],[4,2,'0'],[5,1,'0'],[0,2,'0'],[3,1,'0'],[4,5,'1'],[0,1,'='],[2,5,'1'],[3,4,'1']] },
+  ];
+  koRes = { SF1: 0, SF2: 1, F: 1, '3P': 1 };
+  avatarBgs = ['#e0552b', '#cfd6e3', '#d9a92f', '#d9d0bb'];
+  pieces = ['♜', '♞', '♝', '♛', '♚', '♟'];
+  tilts = ['-1.5deg', '1deg', '-0.6deg', '1.6deg', '-1.1deg', '0.8deg'];
+  pgn = '1. e4 e5 2. Nf3 d6 3. d4 Bg4 4. dxe5 Bxf3 5. Qxf3 dxe5 6. Bc4 Nf6 7. Qb3 Qe7 8. Nc3 c6 9. Bg5 b5 10. Nxb5 cxb5 11. Bxb5+ Nbd7 12. O-O-O Rd8 13. Rxd7 Rxd7 14. Rd1 Qe6 15. Bxd7+ Nxd7 16. Qb8+ Nxb8 17. Rd8#   ✦   Morphy vs. Duke Karl & Count Isouard, Paris 1858. Took 17 moves. You have 10 minutes.   ✦   ';
+  state = { view: 'table', filter: 'all', narrow: typeof window !== 'undefined' ? window.innerWidth < 860 : false };
+  tickerEl = null;
+  tickerRef = (el) => { this.tickerEl = el; if (el) { this.startLoop(); if (!this._jumped) { this._jumped = true; this.jumpToHash(); } } };
+  tk = { x: 0, drag: false, lastX: 0, last: 0, vel: 0 };
+  onResize = () => { const n = window.innerWidth < 860; if (n !== this.state.narrow) this.setState({ narrow: n }); };
+  componentDidMount() { this.startLoop(); this.jumpToHash(); window.addEventListener('resize', this.onResize); this.onResize(); }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); this.raf = null; window.removeEventListener('resize', this.onResize); }
+  jumpToHash() {
+    const id = (location.hash || '').slice(1); if (!id) return;
+    let tries = 0;
+    const go = () => {
+      const el = document.getElementById(id); const root = document.documentElement;
+      if (el && el.offsetTop > 0) {
+        root.style.scrollBehavior = 'auto'; window.scrollTo(0, el.offsetTop - 60);
+        let n = 0; const pin = () => { if (Math.abs(window.scrollY - (el.offsetTop - 60)) > 4) window.scrollTo(0, el.offsetTop - 60); if (n++ < 10) setTimeout(pin, 200); else root.style.scrollBehavior = ''; };
+        setTimeout(pin, 200);
+      } else if (tries++ < 40) setTimeout(go, 150);
+    };
+    setTimeout(go, 100);
+  }
+  startLoop() {
+    if (this.raf) return;
+    const loop = (t) => {
+      const el = this.tickerEl, k = this.tk;
+      const dt = k.last ? Math.min((t - k.last) / 1000, 0.05) : 0; k.last = t;
+      if (el) {
+        const half = el.scrollWidth / 2;
+        if (!k.drag) { k.x += (-(half / (this.props.tickerSpeed ?? 60)) + k.vel) * dt; k.vel *= 0.94; }
+        if (half > 0) k.x = ((k.x % half) + half) % half - half;
+        el.style.transform = `translateX(${k.x}px)`;
+      }
+      this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+  tickerDown = (e) => { this.tk.drag = true; this.tk.lastX = e.clientX; this.tk.vel = 0; e.currentTarget.setPointerCapture(e.pointerId); e.currentTarget.style.cursor = 'grabbing'; };
+  tickerMove = (e) => { if (!this.tk.drag) return; const dx = e.clientX - this.tk.lastX; this.tk.lastX = e.clientX; this.tk.x += dx; this.tk.vel = dx * 60; };
+  tickerUp = (e) => { this.tk.drag = false; e.currentTarget.style.cursor = 'grab'; };
+  initials(name) { return name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
+  stageKey() { const q = new URLSearchParams(location.search).get('stage'); if (q === 'groups' || q === 'semis' || q === 'finished') return q; const s = this.props.stage ?? 'Group stage'; return s === 'Finished' ? 'finished' : s === 'Semifinals' ? 'semis' : 'groups'; }
+  table(g, k) {
+    const st = g.players.map((p, i) => ({ ...p, i, pl: 0, w: 0, d: 0, l: 0, pts: 0, res: {} }));
+    g.games.slice(0, k).forEach(([a, b, r]) => {
+      const A = st[a], B = st[b]; A.pl++; B.pl++;
+      if (r === '1') { A.w++; B.l++; A.res[b] = '1'; B.res[a] = '0'; }
+      else if (r === '0') { B.w++; A.l++; A.res[b] = '0'; B.res[a] = '1'; }
+      else { A.d++; B.d++; A.res[b] = '½'; B.res[a] = '½'; }
+    });
+    st.forEach(s => { s.pts = s.w * 3 + s.d; });
+    return [...st].sort((x, y) => y.pts - x.pts || y.w - x.w || x.i - y.i);
+  }
+  chip(t) {
+    if (t === '1') return { t: '1', bg: '#1c1a17', fg: '#efe6d2', border: '1px solid #1c1a17' };
+    if (t === '½') return { t: '½', bg: '#d9a92f', fg: '#1c1a17', border: '1px solid #1c1a17' };
+    if (t === '0') return { t: '0', bg: '#faf6ec', fg: '#1c1a17', border: '1px solid #1c1a17' };
+    return { t: '·', bg: 'transparent', fg: '#a39b8a', border: '1px dashed #c9c2b2' };
+  }
+  renderVals() {
+    const stage = this.stageKey();
+    const groupsDone = stage !== 'groups';
+    const K = groupsDone ? 15 : Math.max(0, Math.min(15, this.props.groupGamesPlayed ?? 10));
+    const { view, filter, narrow } = this.state;
+    const showOneLiners = this.props.showOneLiners ?? true;
+    const tables = this.groups.map(g => this.table(g, K));
+
+    const groupPanels = this.groups.map((g, gi) => {
+      const t = tables[gi];
+      const base = (s, ri) => ({ rank: String(ri + 1), pts: s.pts, rowBg: ri < 2 ? '#f3ecd9' : '#faf6ec', sep: ri === 1 ? '2px dashed #1c1a17' : '0',
+        rankBg: ri < 2 ? g.accent : 'transparent', rankBorder: ri < 2 ? '1.5px solid #1c1a17' : '1.5px solid transparent' });
+      const rows = t.map((s, ri) => ({ ...base(s, ri), name: s.name, initials: this.initials(s.name), pl: s.pl, w: s.w, d: s.d, l: s.l, q: ri < 2, avatarBg: this.avatarBgs[(s.i + gi) % 4] }));
+      const cross = t.map((s, ri) => ({ ...base(s, ri), short: s.name.split(' ')[0] + ' ' + (s.name.split(' ')[1] || '')[0] + '.',
+        cells: t.map((o, ci) => ci === ri ? { t: '', bg: '#1c1a17', fg: '#1c1a17', border: '1px solid #1c1a17' } : this.chip(s.res[o.i])) }));
+      return { ...g, rows, cross, cols: t.map((_, i) => ({ n: String(i + 1) })), playedLabel: groupsDone ? 'Group complete' : `${K}/15 games played` };
+    });
+
+    // bracket
+    const [tP, tA] = tables; const [gP, gA] = this.groups;
+    const seedSlot = (g, t, n) => ({ seed: g.id + n, name: t[n - 1].name, sub: groupsDone ? `${n === 1 ? 'Winner' : 'Runner-up'}, ${g.name}` : 'if the group ended today', prov: !groupsDone });
+    const played = stage === 'finished' ? ['SF1', 'SF2', 'F', '3P'] : stage === 'semis' ? ['SF1'] : [];
+    const pick = (id, pair, win) => played.includes(id) ? pair[win ? this.koRes[id] : 1 - this.koRes[id]] : null;
+    const from = (x, seed, label) => x ? { seed, name: x.name, sub: label, prov: false } : { seed, name: 'TBD', sub: label, tbd: true };
+    const sf1 = [seedSlot(gP, tP, 1), seedSlot(gA, tA, 2)];
+    const sf2 = [seedSlot(gA, tA, 1), seedSlot(gP, tP, 2)];
+    const fin = [from(pick('SF1', sf1, true), 'W1', 'Winner SF1'), from(pick('SF2', sf2, true), 'W2', 'Winner SF2')];
+    const thd = [from(pick('SF1', sf1, false), 'L1', 'Loser SF1'), from(pick('SF2', sf2, false), 'L2', 'Loser SF2')];
+    const mk = (id, label, pair, pos) => {
+      const isPlayed = played.includes(id);
+      const known = pair.every(s => !s.tbd && !s.prov);
+      const status = isPlayed ? '✓ Played' : known ? '● Next up' : !groupsDone ? 'After groups' : 'Waiting';
+      const wi = isPlayed ? this.koRes[id] : -1;
+      const slots = pair.map((s, i) => ({ seed: s.seed, name: s.name, sub: s.sub, score: isPlayed ? (i === wi ? '1' : '0') : '',
+        bg: i === wi ? '#1c1a17' : '#faf6ec', fg: i === wi ? '#efe6d2' : (s.tbd ? '#8a8272' : '#1c1a17'),
+        italic: (s.prov || s.tbd) ? 'italic' : 'normal', op: isPlayed && i !== wi ? '0.5' : '1', border: i === 0 ? '0' : '1px solid rgba(28,26,23,0.2)' }));
+      return { id, label, status, slots,
+        headBg: known && !isPlayed ? '#e0552b' : '#efe6d2', statusFg: known && !isPlayed ? '#1c1a17' : '#5c5548',
+        col: narrow ? 'auto' : pos.col, row: narrow ? 'auto' : pos.row, mt: narrow ? '0' : (pos.mt || '0') };
+    };
+    const matches = [
+      mk('SF1', 'SF1 · Semifinal', sf1, { col: '1', row: '1' }),
+      mk('SF2', 'SF2 · Semifinal', sf2, { col: '1', row: '2' }),
+      mk('F', 'Final', fin, { col: '3', row: '1 / 3' }),
+      mk('3P', '3rd place', thd, { col: '3', row: '3', mt: '20px' }),
+    ];
+    const champ = pick('F', fin, true), runner = pick('F', fin, false), bronze = pick('3P', thd, true);
+    const stIdx = { groups: 0, semis: 1, finished: 3 }[stage];
+    const stages = [
+      { title: 'Group stage', piece: '♜', count: '30 games · 2 groups of 6', body: 'Group Petrosian and Group Aronian. Inside a group, every pair plays once. Win 3 · Draw 1 · Loss 0.' },
+      { title: 'Semifinals', piece: '♞', count: '2 games', body: "Top two from each group go through. Each group winner plays the other group's runner-up: P1 vs A2, A1 vs P2." },
+      { title: 'Final & 3rd place', piece: '♔', count: '2 games · 1 champion', body: 'Semifinal winners play the final. Semifinal losers play for third place.' },
+    ].map((s, i) => {
+      const st = i < stIdx ? 'done' : i === stIdx ? 'now' : 'next';
+      return { ...s, n: '0' + (i + 1), chip: st === 'now' ? '● Now' : st === 'done' ? '✓ Done' : 'Later',
+        bg: st === 'now' ? '#e0552b' : st === 'done' ? '#efe6d2' : '#faf6ec', chipBg: st === 'now' ? '#1c1a17' : 'transparent', chipFg: st === 'now' ? '#efe6d2' : '#1c1a17' };
+    });
+
+    const all = this.groups.flatMap((g, gi) => g.players.map((p, i) => ({ ...p, gid: g.id, groupShort: g.short, accent: g.accent,
+      initials: this.initials(p.name), avatarBg: this.avatarBgs[(i + gi) % 4], piece: this.pieces[(i + gi * 3) % 6], tilt: this.tilts[(i + gi * 3) % 6] })));
+    const players = filter === 'all' ? all : all.filter(p => p.gid === filter);
+    const filters = [{ key: 'all', label: `All · ${all.length}` }, { key: 'P', label: 'Petrosian · 6' }, { key: 'A', label: 'Aronian · 6' }]
+      .map(f => ({ ...f, onClick: () => this.setState({ filter: f.key }), bg: filter === f.key ? '#1c1a17' : 'transparent', fg: filter === f.key ? '#efe6d2' : '#1c1a17' }));
+
+    const ticker = React.createElement('div', { ref: this.tickerRef, style: { display: 'inline-block', willChange: 'transform' } }, this.pgn + this.pgn);
+    const inDevice = /[?&]device=1/.test(location.search);
+    if (inDevice && !this._hidScroll) { this._hidScroll = true; const s = document.createElement('style'); s.textContent = 'html{scrollbar-width:none}html::-webkit-scrollbar{display:none}'; document.head.appendChild(s); }
+
+    return {
+      inDevice, ticker, tickerDown: this.tickerDown, tickerMove: this.tickerMove, tickerUp: this.tickerUp,
+      stageLabel: { groups: 'Group stage live', semis: 'Semifinals live', finished: 'Champion crowned' }[stage],
+      playerCount: all.length, gamesPlayed: K * 2 + played.length, gamesTotal: 34, groupGamesPlayed: K * 2,
+      stages, groupPanels, isTable: view === 'table', isCross: view === 'cross',
+      showTable: () => this.setState({ view: 'table' }), showCross: () => this.setState({ view: 'cross' }),
+      tableBtnBg: view === 'table' ? '#efe6d2' : 'transparent', tableBtnFg: view === 'table' ? '#1c1a17' : '#efe6d2',
+      crossBtnBg: view === 'cross' ? '#efe6d2' : 'transparent', crossBtnFg: view === 'cross' ? '#1c1a17' : '#efe6d2',
+      matches, bCols: narrow ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 44px minmax(0, 1fr) 44px minmax(0, 0.8fr)',
+      connDisplay: narrow ? 'none' : 'block', champCol: narrow ? 'auto' : '5', champRow: narrow ? 'auto' : '1 / 3', champMt: narrow ? '12px' : '0',
+      champName: champ ? champ.name : 'To be decided', champItalic: champ ? 'normal' : 'italic',
+      champSub: champ ? `Runner-up: ${runner.name}. Third place: ${bronze.name}.` : 'Crowned after the final. Bragging rights for a full year.',
+      bracketNote: { groups: 'Names in italics are who would go through if the groups ended today.', semis: 'Groups are done. The semis are on.', finished: "That's a wrap. See you next season." }[stage],
+      players, filters, showOneLiners, wide: !narrow, navPad: narrow ? '7px' : '10px',
+    };
+  }
+}
+</script>
+</body>
+</html>

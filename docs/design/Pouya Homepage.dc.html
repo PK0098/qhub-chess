@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+  <style>
+    body { margin: 0; background: #f4efe4; color: #1c1a17; font-family: 'IBM Plex Mono', ui-monospace, monospace; -webkit-font-smoothing: antialiased; }
+    a { color: #1c1a17; text-decoration: none; }
+    a:hover { color: #b5562e; }
+    * { box-sizing: border-box; }
+    @keyframes cursor { 0%,45% { opacity: 1; } 50%,95% { opacity: 0; } 100% { opacity: 1; } }
+  </style>
+</helmet>
+
+<div data-screen-label="Homepage" style="min-height: 100vh; display: flex; flex-direction: column; background: #f4efe4; color: #1c1a17; font-family: 'IBM Plex Mono', ui-monospace, monospace;">
+
+  <header style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px clamp(20px, 5vw, 56px); font-size: 12px; letter-spacing: 0.08em; color: #6b6458;">
+    <span>pouyakarimi.com</span>
+    <span>{{ localTime }} · Yerevan</span>
+  </header>
+
+  <main style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 8vh clamp(20px, 5vw, 56px) 10vh; max-width: 760px; width: 100%; margin: 0 auto;">
+    <div style="font-size: 12px; letter-spacing: 0.08em; color: #6b6458; margin-bottom: 20px;">~ $ whoami</div>
+    <h1 style="margin: 0; font-weight: 600; font-size: clamp(30px, 5vw, 52px); line-height: 1.1; letter-spacing: -0.02em;">Pouya Karimi<span aria-hidden="true" style="display: inline-block; width: 0.5em; height: 0.9em; background: #b5562e; vertical-align: -0.1em; margin-left: 6px; animation: cursor 1.2s steps(1) infinite;"></span></h1>
+    <p style="margin: 22px 0 0; font-size: clamp(16px, 1.6vw, 19px); line-height: 1.65; max-width: 44ch; text-wrap: pretty;">Product manager at <a href="https://pharmabits.eu" target="_blank" rel="noopener" style="border-bottom: 1.5px solid #1c1a17;">Pharmabits</a>. I build tools for pharmacies and occasionally talk colleagues into playing chess.</p>
+
+    <div style="margin-top: 44px; display: flex; flex-direction: column; gap: 0; border-top: 1px solid #1c1a17;">
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #1c1a17; color: #6b6458;">
+        <span style="font-size: 15px;">Portfolio</span>
+        <span style="font-size: 12px; letter-spacing: 0.08em;">coming soon</span>
+      </div>
+      <a href="https://chess.pouyakarimi.com/" target="_blank" rel="noopener" style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #1c1a17; min-height: 48px;" style-hover="color: #b5562e;">
+        <span style="font-size: 15px;">Friendly Chess Tournament <span style="color: #6b6458; font-size: 13px;">— for the Anahit office</span></span>
+        <span style="font-size: 12px; letter-spacing: 0.08em;">chess.pouyakarimi.com ↗</span>
+      </a>
+      <a href="https://www.linkedin.com/in/pouya-karimi-6b82ab18a/" target="_blank" rel="noopener" style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #1c1a17; min-height: 48px;" style-hover="color: #b5562e;">
+        <span style="font-size: 15px;">LinkedIn</span>
+        <span style="font-size: 12px; letter-spacing: 0.08em;">in/pouya-karimi ↗</span>
+      </a>
+    </div>
+  </main>
+
+  <footer style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 22px clamp(20px, 5vw, 56px); font-size: 12px; letter-spacing: 0.08em; color: #6b6458;">
+    <span>© {{ year }} Pouya Karimi</span>
+    <span>1. e4</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { now: new Date() };
+  componentDidMount() { this.t = setInterval(() => this.setState({ now: new Date() }), 30000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const localTime = this.state.now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Yerevan' });
+    return { localTime, year: this.state.now.getFullYear() };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; background: #d9d0bb; font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #1c1a17; }
+    a { color: #2b3f6b; } a:hover { color: #1c1a17; }
+  </style>
+</helmet>
+<div data-screen-label="Mobile screens" style="min-height: 100vh; padding: 48px 40px 64px; display: flex; flex-direction: column; gap: 28px; background: #d9d0bb; background-image: repeating-conic-gradient(rgba(28,26,23,0.05) 0 25%, transparent 0 50%); background-size: 64px 64px;">
+  <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px;">
+    <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: #e0552b;">Anahit Friendly Chess Tournament · iPhone · 402 × 874</div>
+    <a href="Chess Tournament.dc.html" style="font-size: 12px; letter-spacing: 0.06em; text-decoration: underline;">Open desktop page →</a>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">01 · Hero</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <iframe src="Chess Tournament.dc.html?device=1" title="Hero" style="display: block; width: 402px; height: 874px; border: 0; background: #1c1a17;"></iframe>
+      </x-import>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">02 · Rules</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <iframe src="Chess Tournament.dc.html?device=1#rules" title="Rules" style="display: block; width: 402px; height: 874px; border: 0; background: #1c1a17;"></iframe>
+      </x-import>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">03 · Standings</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <iframe src="Chess Tournament.dc.html?device=1#standings" title="Standings" style="display: block; width: 402px; height: 874px; border: 0; background: #1c1a17;"></iframe>
+      </x-import>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">04 · Players</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <iframe src="Chess Tournament.dc.html?device=1#players" title="Players" style="display: block; width: 402px; height: 874px; border: 0; background: #1c1a17;"></iframe>
+      </x-import>
+    </div>
+  </div>
+  <div style="font-size: 12px; color: #5c5548; max-width: 60ch; line-height: 1.6;">Each phone is the live page, so edits to the desktop file show up here. Scroll inside any phone; the ticker drags with a finger.</div>
+</div>
+</x-dc>
+</body>
+</html>

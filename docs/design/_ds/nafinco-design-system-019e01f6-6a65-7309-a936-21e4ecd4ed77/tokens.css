@@ -1,0 +1,279 @@
+/* =============================================================
+   NAFINCO DESIGN SYSTEM — DESIGN TOKENS
+   "Voor de apotheker doen we alles"
+   ============================================================= */
+
+/* Fonts: Figtree (rounded geometric sans) + Source Serif Pro for editorial accents */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  /* ---------- BRAND COLORS ---------- */
+  /* Primary teal — used for headlines, primary brand surfaces, dark hero gradients */
+  --naf-teal-900: #2c5d6c;        /* deepest hero gradient end */
+  --naf-teal-700: #3d8296;        /* PRIMARY heading + brand teal */
+  --naf-teal-500: #67b2c9;        /* mid teal — secondary accents, decorative blocks */
+  --naf-teal-300: #a8d4e0;        /* light cyan — section bands */
+  --naf-teal-100: #dff0f5;        /* paper-light tint — alt section background */
+  --naf-teal-50:  #f1f8fa;        /* near-white tint */
+
+  /* Hero photographic blue — used as overlay on photography */
+  --naf-sky-500: #73c9e3;
+  --naf-sky-300: #b9e1ec;
+
+  /* Orange — single-purpose accent: CTAs, underline marks, the "dot" */
+  --naf-orange-500: #ff7c47;      /* PRIMARY orange — buttons, marks */
+  --naf-orange-600: #ed6633;      /* hover state */
+  --naf-orange-100: #ffe5d6;      /* pale halo for icon circles */
+
+  /* Warm yellow — supportive icon backgrounds (the cream halo behind service icons) */
+  --naf-cream-100: #fde8c8;       /* circular icon background on white cards */
+  --naf-yellow-500: #ffac3b;      /* yellow icon accent */
+
+  /* Neutrals */
+  --naf-ink:        #0a0a0a;      /* near-black for body copy + black headlines */
+  --naf-ink-700:    #2a2a2a;
+  --naf-ink-500:    #5a5a5a;      /* muted body */
+  --naf-ink-300:    #a8a8a8;
+  --naf-line:       #e5e5e5;
+  --naf-paper:      #ffffff;
+  --naf-paper-alt:  #fafafa;
+
+  /* Semantic */
+  --naf-success: #7cb342;
+  --naf-warn:    #ffac3b;
+  --naf-danger:  #d8452f;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --naf-font-sans: 'Figtree', system-ui, -apple-system, sans-serif;
+  --naf-font-serif: 'Source Serif 4', Georgia, serif;
+
+  /* Type scale (modular ~1.25) */
+  --naf-text-xs:   12px;
+  --naf-text-sm:   14px;
+  --naf-text-base: 16px;
+  --naf-text-md:   18px;
+  --naf-text-lg:   22px;
+  --naf-text-xl:   28px;
+  --naf-text-2xl:  36px;
+  --naf-text-3xl:  48px;
+  --naf-text-4xl:  64px;
+  --naf-text-5xl:  88px;
+  --naf-text-6xl:  120px;
+
+  /* Weights */
+  --naf-fw-regular: 400;
+  --naf-fw-medium:  500;
+  --naf-fw-semi:    600;
+  --naf-fw-bold:    700;
+  --naf-fw-black:   900;
+
+  /* ---------- SPACING ---------- */
+  --naf-space-1:  4px;
+  --naf-space-2:  8px;
+  --naf-space-3:  12px;
+  --naf-space-4:  16px;
+  --naf-space-5:  24px;
+  --naf-space-6:  32px;
+  --naf-space-7:  48px;
+  --naf-space-8:  64px;
+  --naf-space-9:  96px;
+  --naf-space-10: 128px;
+
+  /* ---------- RADII ---------- */
+  --naf-radius-sm:   6px;
+  --naf-radius-md:   12px;
+  --naf-radius-lg:   20px;
+  --naf-radius-xl:   28px;
+  --naf-radius-pill: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  --naf-shadow-sm: 0 1px 2px rgba(15, 60, 75, 0.06), 0 1px 1px rgba(15, 60, 75, 0.04);
+  --naf-shadow-md: 0 4px 14px rgba(15, 60, 75, 0.08), 0 2px 4px rgba(15, 60, 75, 0.04);
+  --naf-shadow-lg: 0 18px 40px rgba(15, 60, 75, 0.10), 0 6px 12px rgba(15, 60, 75, 0.05);
+
+  /* ---------- HERO GRADIENT ----------
+     The signature "blue room" gradient seen on the homepage hero.
+     Use as background-image on any hero block or full-bleed section. */
+  --naf-hero-gradient: radial-gradient(120% 80% at 30% 20%, #b9e1ec 0%, #73c9e3 35%, #3d8296 75%, #2c5d6c 100%);
+  --naf-hero-gradient-flat: linear-gradient(180deg, #a8d4e0 0%, #3d8296 100%);
+  --naf-band-light: #dff0f5;       /* the pale band you see between sections */
+}
+
+/* =============================================================
+   BASE TYPE STYLES — apply by class, never bare elements
+   ============================================================= */
+
+.naf-display {
+  /* Billboard/brochure cover headline — UPPERCASE BLACK weight */
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-black);
+  font-size: var(--naf-text-5xl);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--naf-ink);
+}
+.naf-display--white { color: var(--naf-paper); }
+
+.naf-h1 {
+  /* Hero & section headlines — sentence case, teal */
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-bold);
+  font-size: var(--naf-text-3xl);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--naf-teal-700);
+}
+.naf-h1--white { color: var(--naf-paper); }
+
+.naf-h2 {
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-bold);
+  font-size: var(--naf-text-2xl);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--naf-teal-700);
+}
+
+.naf-h3 {
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-semi);
+  font-size: var(--naf-text-xl);
+  line-height: 1.2;
+  color: var(--naf-teal-700);
+}
+
+.naf-eyebrow {
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-semi);
+  font-size: var(--naf-text-sm);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--naf-orange-500);
+}
+
+.naf-body {
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-regular);
+  font-size: var(--naf-text-md);
+  line-height: 1.55;
+  color: var(--naf-ink);
+}
+.naf-body-sm { font-size: var(--naf-text-base); line-height: 1.5; }
+.naf-body--muted { color: var(--naf-ink-500); }
+.naf-body--white { color: rgba(255,255,255,0.92); }
+
+.naf-quote {
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-regular);
+  font-size: var(--naf-text-lg);
+  line-height: 1.5;
+  color: var(--naf-teal-700);
+  font-style: normal;
+}
+
+/* The signature wordmark trick: "apoTHEEker" — highlight a
+   substring of a word in teal to reveal a hidden word ("thee" = tea).
+   Use sparingly, on a SINGLE headline per piece. */
+.naf-wordplay { color: var(--naf-teal-500); font-weight: inherit; }
+
+/* The orange brush-underline on a key word */
+.naf-mark {
+  position: relative;
+  display: inline-block;
+}
+.naf-mark::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  bottom: -0.18em;
+  height: 0.18em;
+  background: var(--naf-orange-500);
+  border-radius: 999px;
+  transform: skewX(-6deg) rotate(-1deg);
+  z-index: -1;
+}
+
+/* The tiny orange "." that ends every hero headline */
+.naf-dot {
+  color: var(--naf-orange-500);
+  font-weight: inherit;
+}
+
+/* =============================================================
+   BUTTONS
+   ============================================================= */
+.naf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--naf-radius-pill);
+  font-family: var(--naf-font-sans);
+  font-weight: var(--naf-fw-semi);
+  font-size: var(--naf-text-base);
+  border: 0;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.naf-btn--primary {
+  background: var(--naf-orange-500);
+  color: white;
+}
+.naf-btn--primary:hover {
+  background: var(--naf-orange-600);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255,124,71,0.35);
+}
+.naf-btn--ghost {
+  background: transparent;
+  color: var(--naf-teal-700);
+  border: 2px solid var(--naf-teal-700);
+}
+.naf-btn--white {
+  background: white;
+  color: var(--naf-teal-700);
+}
+
+/* =============================================================
+   CARD — the signature service card with circular cream icon halo
+   ============================================================= */
+.naf-card {
+  background: white;
+  border-radius: var(--naf-radius-lg);
+  padding: 48px 32px 32px;
+  box-shadow: var(--naf-shadow-md);
+  text-align: center;
+  position: relative;
+}
+.naf-card__halo {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: var(--naf-cream-100);
+  display: grid;
+  place-items: center;
+}
+.naf-card__halo svg { width: 38px; height: 38px; color: var(--naf-orange-500); }
+
+/* =============================================================
+   STEPPED MOTIF — the brand's pixel-staircase decorative shape.
+   It echoes the logo "n" mark. Use as a corner ornament.
+   ============================================================= */
+.naf-steps {
+  display: inline-block;
+  width: 96px;
+  height: 96px;
+  background-image:
+    linear-gradient(var(--naf-teal-300), var(--naf-teal-300));
+  background-size: 100% 100%;
+  /* Built via SVG mask in real usage — see logo file */
+}
