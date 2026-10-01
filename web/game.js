@@ -13,7 +13,20 @@
     return a;
   }
 
+  // Standings points at the groups while the group stage runs, at the bracket once it is done (same rule as the landing page).
+  async function pointStandings() {
+    try {
+      const r = await fetch('/api/state', { cache: 'no-store' });
+      if (!r.ok) return;
+      const { games } = await r.json();
+      const group = games.filter((g) => g.round === 1);
+      const done = group.length > 0 && group.every((g) => g.status === 'confirmed');
+      $('nav-standings').href = done ? '/#bracket' : '/#groups';
+    } catch { /* keep the /#groups default */ }
+  }
+
   async function load() {
+    pointStandings();
     if (!token) return showEmpty('This link is missing its personal code. Open the link from your email.');
     const r = await fetch('/api/me?t=' + encodeURIComponent(token), { cache: 'no-store' });
     if (!r.ok) return showEmpty(r.status === 404 ? 'We don\'t recognise this link. Open the one from your email.' : 'Something went wrong. Try again in a minute.');
