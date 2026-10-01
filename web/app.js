@@ -317,7 +317,7 @@
         }
         rows.forEach((r, i) => {
           const tr = document.createElement('tr'); tr.className = unranked ? '' : (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
-          const p = byId.get(r.id); const short = p ? p.name.split(' ')[0] + ' ' + (p.name.split(' ')[1] || '')[0] + '.' : '?';
+          const p = byId.get(r.id); const short = p ? p.name.split(' ')[0] + (p.name.split(' ')[1] ? ' ' + p.name.split(' ')[1][0] + '.' : '') : '?';
           tr.innerHTML = `<td><span class="grank">${unranked ? '–' : i + 1}</span></td><td><span class="gplayer"></span></td>` +
             rows.map((o) => { if (o.id === r.id) return '<td class="x"><span class="xchip self"></span></td>'; const k = res.get(`${r.id}-${o.id}`); return `<td class="x"><span class="xchip ${k || 'none'}">${k === 'w' ? '1' : k === 'l' ? '0' : k === 'd' ? '½' : '·'}</span></td>`; }).join('') +
             `<td class="pts">${r.points}</td>`;
