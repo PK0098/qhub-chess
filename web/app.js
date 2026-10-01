@@ -279,7 +279,10 @@
     const wrap = $('group-panels'); wrap.innerHTML = '';
     for (const key of ['P', 'A']) {
       const meta = GROUPS[key];
-      const rows = groups[key] || [];
+      let rows = groups[key] || [];
+      // Before the first result everyone is level on 0, so a rank would only be the random draw: list A-Z, no ranks.
+      const unranked = rows.every((r) => r.played === 0);
+      if (unranked) rows = [...rows].sort((a, b) => ((byId.get(a.id) || {}).name || '').localeCompare((byId.get(b.id) || {}).name || ''));
       const panel = document.createElement('div'); panel.className = 'gpanel'; panel.style.setProperty('--gacc', meta.accent);
       const mine = groupGames.filter((g) => g.p2 !== null && rows.some((r) => r.id === g.p1));
       const done = mine.filter((g) => g.status === 'confirmed').length;
@@ -292,20 +295,20 @@
         const cell = document.createElement('span'); cell.className = 'gplayer';
         if (p) cell.appendChild(avatarEl(p, 'xs'));
         const nm = document.createElement('span'); nm.textContent = p ? p.name : '?'; cell.appendChild(nm);
-        if (i < 2) { const sf = document.createElement('span'); sf.className = 'sf'; sf.textContent = 'SF'; cell.appendChild(sf); }
+        if (i < 2 && !unranked) { const sf = document.createElement('span'); sf.className = 'sf'; sf.textContent = 'SF'; cell.appendChild(sf); }
         td.appendChild(cell); return td;
       };
       if (view === 'table') {
         head.innerHTML = `<th>#</th><th>Player</th><th class="c" title="Played">P</th><th class="c" title="Won">W</th><th class="c" title="Drawn">D</th><th class="c" title="Lost">L</th><th class="pts">Pts</th>`;
         rows.forEach((r, i) => {
-          const tr = document.createElement('tr'); tr.className = (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
-          tr.innerHTML = `<td><span class="grank">${i + 1}</span></td>`;
+          const tr = document.createElement('tr'); tr.className = unranked ? '' : (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
+          tr.innerHTML = `<td><span class="grank">${unranked ? '–' : i + 1}</span></td>`;
           tr.appendChild(nameCell(r, i));
           tr.insertAdjacentHTML('beforeend', `<td class="c muted">${r.played}</td><td class="c">${r.w}</td><td class="c">${r.d}</td><td class="c">${r.l}</td><td class="pts">${r.points}</td>`);
           body.appendChild(tr);
         });
       } else {
-        head.innerHTML = `<th>#</th><th>Player</th>${rows.map((_, i) => `<th class="c">${i + 1}</th>`).join('')}<th class="pts">Pts</th>`;
+        head.innerHTML = `<th>#</th><th>Player</th>${rows.map((_, i) => `<th class="c">${unranked ? '·' : i + 1}</th>`).join('')}<th class="pts">Pts</th>`;
         const res = new Map(); // "a-b" -> result for a
         for (const g of mine) {
           if (g.status !== 'confirmed' || !g.result) continue;
@@ -313,9 +316,9 @@
           res.set(`${g.p1}-${g.p2}`, a); res.set(`${g.p2}-${g.p1}`, a === 'w' ? 'l' : a === 'l' ? 'w' : 'd');
         }
         rows.forEach((r, i) => {
-          const tr = document.createElement('tr'); tr.className = (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
+          const tr = document.createElement('tr'); tr.className = unranked ? '' : (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
           const p = byId.get(r.id); const short = p ? p.name.split(' ')[0] + ' ' + (p.name.split(' ')[1] || '')[0] + '.' : '?';
-          tr.innerHTML = `<td><span class="grank">${i + 1}</span></td><td><span class="gplayer"></span></td>` +
+          tr.innerHTML = `<td><span class="grank">${unranked ? '–' : i + 1}</span></td><td><span class="gplayer"></span></td>` +
             rows.map((o) => { if (o.id === r.id) return '<td class="x"><span class="xchip self"></span></td>'; const k = res.get(`${r.id}-${o.id}`); return `<td class="x"><span class="xchip ${k || 'none'}">${k === 'w' ? '1' : k === 'l' ? '0' : k === 'd' ? '½' : '·'}</span></td>`; }).join('') +
             `<td class="pts">${r.points}</td>`;
           tr.querySelector('.gplayer').textContent = short;
@@ -331,8 +334,11 @@
     const find = (round, slot) => games.find((g) => g.round === round && g.slot === slot) || null;
     const name = (id) => (byId.get(id) || {}).name || '?';
     const seedSlot = (key, n) => {
-      const rows = groups[key] || []; const r = rows[n - 1];
-      return { seed: key + n, name: r ? name(r.id) : 'TBD', sub: groupsDone ? `${n === 1 ? 'Winner' : 'Runner-up'}, ${GROUPS[key].full}` : 'if the group ended today', prov: !groupsDone && !!r, tbd: !r };
+      const r = groupsDone ? (groups[key] || [])[n - 1] : null;
+      const role = n === 1 ? 'Winner' : 'Runner-up';
+      return r
+        ? { seed: key + n, name: name(r.id), sub: `${role}, ${GROUPS[key].full}` }
+        : { seed: key + n, name: `${role} ${GROUPS[key].full}`, sub: 'Decided when the group ends', tbd: true };
     };
     const fromGame = (g, i, seed, label) => g ? { seed, name: name(i === 0 ? g.p1 : g.p2), sub: label } : { seed, name: 'TBD', sub: label, tbd: true };
     const mk = (cls, label, g, pair) => {
@@ -372,7 +378,7 @@
     card.querySelector('.champ-name').textContent = champ ? name(champ) : 'To be decided';
     card.querySelector('.champ-sub').textContent = champ ? `Runner-up: ${name(runner)}.${bronze ? ` Third place: ${name(bronze)}.` : ''}` : 'Crowned after the final. Bragging rights for a full year.';
     wrap.appendChild(card);
-    $('bracket-note').textContent = { groups: 'Names in italics are who would go through if the groups ended today.', semis: 'Groups are done. The knockouts are on.', finished: "That's a wrap. See you next season." }[stage];
+    $('bracket-note').textContent = { groups: 'Semifinal places fill in when the group stage ends.', semis: 'Groups are done. The knockouts are on.', finished: "That's a wrap. See you next season." }[stage];
   }
 
   function initTicker() {
