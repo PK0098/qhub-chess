@@ -35,6 +35,10 @@
   .btn-line:hover { background: var(--ink); color: var(--cream); }
   .btn-orange { background: var(--orange); color: var(--ink); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
   .btn-orange:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+  .actions .btn:disabled { cursor: default; opacity: .6; transform: none; }
+  .actions .btn.loading { opacity: 1; }
+  .actions .btn.loading::before { content: ''; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .empty { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
   .err { margin-top: 10px; padding: 8px 10px; background: var(--orange); border: 1.5px solid var(--ink); font-size: 12.5px; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }

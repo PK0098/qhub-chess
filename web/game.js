@@ -78,24 +78,29 @@
 
     const actions = document.createElement('div'); actions.className = 'actions';
     const err = document.createElement('div'); err.className = 'err'; err.hidden = true;
-    const post = async (url, body) => {
+    const post = async (b, url, body) => {
       err.hidden = true;
-      actions.querySelectorAll('button').forEach((b) => (b.disabled = true));
-      const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ t: token, g: g.id, ...body }) });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) { err.textContent = d.error || 'Something went wrong.'; err.hidden = false; actions.querySelectorAll('button').forEach((b) => (b.disabled = false)); return; }
-      load();
+      const label = b.textContent;
+      actions.querySelectorAll('button').forEach((x) => (x.disabled = true));
+      b.classList.add('loading'); b.textContent = 'Saving…';
+      const restore = () => { b.classList.remove('loading'); b.textContent = label; actions.querySelectorAll('button').forEach((x) => (x.disabled = false)); };
+      try {
+        const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ t: token, g: g.id, ...body }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { err.textContent = d.error || 'Something went wrong.'; err.hidden = false; restore(); return; }
+      } catch { err.textContent = 'Network problem. Try again.'; err.hidden = false; restore(); return; }
+      load(); // re-renders the card, which replaces this button
     };
-    const btn = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + cls; b.textContent = label; b.onclick = fn; return b; };
+    const btn = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + cls; b.textContent = label; b.onclick = () => fn(b); return b; };
 
     if (g.canConfirm) {
-      actions.append(btn('Confirm', 'btn-dark', () => post('/api/confirm', { action: 'confirm' })),
-        btn('Dispute', 'btn-line', () => { if (confirm('Dispute this result? The organizer will be notified.')) post('/api/confirm', { action: 'dispute' }); }));
+      actions.append(btn('Confirm', 'btn-dark', (b) => post(b, '/api/confirm', { action: 'confirm' })),
+        btn('Dispute', 'btn-line', (b) => { if (confirm('Dispute this result? The organizer will be notified.')) post(b, '/api/confirm', { action: 'dispute' }); }));
     } else if (g.canReport) {
-      actions.append(btn('I won', 'btn-orange', () => post('/api/report', { result: 'win' })));
-      if (!ko) actions.append(btn('Draw', 'btn-line', () => post('/api/report', { result: 'draw' })));
+      actions.append(btn('I won', 'btn-orange', (b) => post(b, '/api/report', { result: 'win' })));
+      if (!ko) actions.append(btn('Draw', 'btn-line', (b) => post(b, '/api/report', { result: 'draw' })));
       if (ko) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = 'No draws in the knockout: a drawn game is replayed until someone wins.'; el.appendChild(h); }
-      actions.append(btn('I lost', 'btn-dark', () => post('/api/report', { result: 'loss' })));
+      actions.append(btn('I lost', 'btn-dark', (b) => post(b, '/api/report', { result: 'loss' })));
     }
     if (actions.children.length) el.appendChild(actions);
     el.appendChild(err);
