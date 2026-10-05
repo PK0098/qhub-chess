@@ -135,6 +135,59 @@ export const templates = {
     };
   },
 
+  // One-off progress nudge. stats: { done, total, pct, idle, perDay, groupsEta, finalEta }.
+  // played / left: this player's group games. remaining: [{name, company, email}] still to play.
+  progress(env, { player, stats, played, left, remaining }) {
+    const url = meLink(env, player.token);
+    const zero = played === 0;
+    const bar = `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:2px solid #1c1a17;margin:6px 0 4px"><tr>
+      <td width="${stats.pct}%" style="background:#e0552b;height:18px;font-size:0;line-height:0">&nbsp;</td>
+      <td style="background:#faf6ec;height:18px;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+    const stat = (n, label) => `<td style="border:2px solid #1c1a17;padding:10px 6px;text-align:center;background:#efe6d2"><div style="font-size:22px;font-weight:700;font-family:'Space Grotesk',Arial,sans-serif">${n}</div><div style="font-size:11px;color:#5c5548">${label}</div></td>`;
+    const n = played + left;
+    const tag = !played ? 'WARMING UP' : left ? 'ON THE BOARD' : 'GROUP DONE';
+    const sq = (i) => `<td width="${Math.floor(100 / n)}%" style="padding:0 3px"><div style="height:38px;border:2px solid #1c1a17;background:${i < played ? '#e0552b' : '#efe6d2'};text-align:center;line-height:38px;font-size:${i < played ? 20 : 14}px;font-weight:700;color:${i < played ? '#1c1a17' : '#9a917f'}">${i < played ? '&#9822;' : i + 1}</div></td>`;
+    const caption = left ? `&rarr; Game ${played + 1} is next. ${left} to go.` : '&rarr; All games played. Nice.';
+    const you = `<div style="border:2px solid #1c1a17;background:#faf6ec;margin:0 0 14px;box-shadow:4px 4px 0 #1c1a17">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#1c1a17"><tr>
+        <td style="padding:6px 10px;color:#efe6d2;font-size:10px;font-weight:700;letter-spacing:0.12em">YOUR GAMES</td>
+        <td align="right" style="padding:5px 8px"><span style="background:#e0552b;color:#1c1a17;font-size:10px;font-weight:700;letter-spacing:0.08em;padding:3px 8px">${tag}</span></td></tr></table>
+      <div style="padding:12px 12px 10px">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+          <td style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700"><span style="font-size:36px;letter-spacing:-0.03em">${played}</span><span style="font-size:18px;color:#5c5548"> /${n}</span></td>
+          <td align="right" valign="bottom" style="font-size:11px;color:#5c5548;padding-bottom:6px">played</td></tr></table>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px -3px 0;width:calc(100% + 6px)"><tr>${Array.from({ length: n }, (_, i) => sq(i)).join('')}</tr></table>
+        <div style="font-size:12px;color:#e0552b;font-weight:700;padding-top:10px">${caption}</div>
+      </div></div>`;
+    const list = remaining.length
+      ? `<p style="margin:0 0 6px"><strong>${zero ? 'Your opponents' : 'Still waiting for you'}:</strong></p>
+        <ul style="padding-left:18px;margin:0 0 14px">${remaining.map((o) => `<li style="margin:4px 0">${opponentLine(o)}</li>`).join('')}</ul>` : '';
+    return {
+      subject: zero ? `${first(player.name)}, your pieces miss you (tournament update)` : `Tournament update: ${stats.done} of ${stats.total} games played`,
+      html: layout(`Thank you. Now please play.`, `
+        <p>Hi ${esc(first(player.name))}. First, the important part: <strong>thank you</strong>. A few weeks ago this was a flyer and an idea. Now ${esc(String(stats.players))} people from all over the building are playing real games of chess against each other, and that only happens because you showed up. We love that.</p>
+        <p>Now, the less glamorous part. A progress report:</p>
+        <table role="presentation" width="100%" cellspacing="6" cellpadding="0" style="margin:0 -3px"><tr>
+          ${stat(`${stats.done}/${stats.total}`, 'group games done')}${stat(`${stats.pct}%`, 'of the group stage')}${stat(stats.idle, 'players on 0 games')}
+        </tr></table>
+        ${bar}
+        <p style="margin:14px 0 6px"><strong>The maths nobody asked for.</strong> The first result came in on 1 October. Since then we've averaged about <strong>${esc(String(stats.perDay))} games a day</strong>. At that pace the group stage ends around <strong>${esc(stats.groupsEta)}</strong>, and the champion gets crowned around <strong>${esc(stats.finalEta)}</strong>. By then the chess sets in the kitchens will have collected dust, and so will we.</p>
+        <p>The good news is that this is easy to fix. A game takes about 15 minutes. That's one coffee break, and it moves the whole tournament forward.</p>
+        ${you}
+        ${list}
+        <p style="margin:0 0 6px"><strong>The ask: get on Telegram.</strong> It's the fastest way to find an opponent. Join the channel, say "anyone free for chess today?", and someone will almost certainly be up for a game within the hour.</p>
+        <p style="margin:12px 0"><a href="https://t.me/+_gfRxTIi3tBkNGFk" style="display:inline-block;background:#2b3f6b;color:#faf6ec;padding:12px 20px;border:2px solid #1c1a17;font-weight:700;text-decoration:none">Join the Telegram channel &rarr;</a></p>
+        <p>Prefer email? That works too: message an opponent from the list above directly and agree a time. Either way, aim to play <em>this week</em>. Lunch hour and end of day both work.</p>
+        ${button(url, 'Your player page')}
+        <p style="font-size:12px;color:#5c5548">Reporting is easy. Either player taps the result on the page above, and the other confirms. No reply within ${esc(env.CONFIRM_HOURS)} hours counts as confirmed.</p>`),
+      text: `Hi ${first(player.name)}. Thank you for making this tournament happen.
+Progress: ${stats.done} of ${stats.total} group games played (${stats.pct}%), ${stats.idle} players still on 0 games. At ~${stats.perDay} games/day the group stage ends around ${stats.groupsEta} and the champion is crowned around ${stats.finalEta}.
+You have played ${played} of ${played + left}. ${left ? 'Please join the Telegram channel (or email an opponent) and set a time this week.' : 'Nice work.'}
+Telegram: https://t.me/+_gfRxTIi3tBkNGFk
+Your page: ${url}`,
+    };
+  },
+
   reported(env, { player, reporter, outcomeText, gameId }) {
     const url = gameLink(env, player.token, gameId);
     return {

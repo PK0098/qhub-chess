@@ -41,7 +41,6 @@
       <div>Flyer scans<b>${esc(d.settings.flyer_scans || 0)}</b></div><div>Announced<b style="font-size:12px">${esc(d.settings.announced_at ? d.settings.announced_at.slice(0, 16).replace('T', ' ') : 'not yet')}</b></div><div>Closes<b style="font-size:13px">${esc(d.vars.CLOSE_DATE)}</b></div>
       <div>Mail from<b style="font-size:12px">${esc(d.vars.MAIL_FROM)}</b></div><div>Site<b style="font-size:12px">${esc(d.vars.SITE_URL)}</b></div>`;
     $('close-btn').disabled = phase !== 'registration' || d.players.length < 4;
-    $('announce-btn').textContent = d.settings.announced_at ? 'Announce format change again' : 'Announce format change';
 
     $('pcount').textContent = d.players.length;
     $('players').innerHTML = `<tr><th>Code</th><th>Name</th><th>Grp</th><th>Company</th><th>Email</th><th>Photo</th><th></th></tr>` +
@@ -88,18 +87,37 @@
     catch (e) { msg($('msg'), esc(e.message), 'bad'); }
     load();
   };
-  $('announce-btn').onclick = async () => {
-    const again = $('announce-btn').textContent.endsWith('again');
-    if (!confirm(`Send the format-change email to every registered player${again ? ' AGAIN' : ''}?`)) return;
-    $('announce-btn').disabled = true;
-    try { const r = await api('announce', { force: again }); msg($('msg'), r.failed.length ? `Sent to ${r.sent}. FAILED for: ${esc(r.failed.join(', '))}` : `Announcement sent to ${r.sent} players.`, r.failed.length ? 'bad' : 'ok'); }
-    catch (e) { msg($('msg'), esc(e.message), 'bad'); }
-    load();
+  let bcList = [];
+  async function loadBroadcasts() {
+    const { templates } = await api('broadcast');
+    bcList = templates;
+    const cur = $('bc-select').value;
+    $('bc-select').innerHTML = templates.map((t) => `<option value="${esc(t.id)}">${esc(t.label)}${t.sentAt ? ' (sent ' + esc(t.sentAt.slice(0, 16).replace('T', ' ')) + ')' : ''}</option>`).join('');
+    if (cur) $('bc-select').value = cur;
+  }
+  $('bc-preview').onclick = async () => {
+    msg($('bc-msg'), 'Loading…');
+    try {
+      const r = await api('broadcast', { template: $('bc-select').value, preview: true });
+      $('bc-view').hidden = false; $('bc-view').srcdoc = r.html;
+      msg($('bc-msg'), `Preview as ${esc(r.to)}. Subject: ${esc(r.subject)}`);
+    } catch (e) { msg($('bc-msg'), esc(e.message), 'bad'); }
+  };
+  $('bc-send').onclick = async () => {
+    const t = bcList.find((x) => x.id === $('bc-select').value);
+    if (!t) return;
+    const again = !!t.sentAt;
+    if (!confirm(`Send "${t.label}" to every player${again ? ' AGAIN (already sent ' + t.sentAt.slice(0, 16).replace('T', ' ') + ')' : ''}?`)) return;
+    $('bc-send').disabled = true;
+    try { const r = await api('broadcast', { template: t.id, force: again }); msg($('bc-msg'), r.failed.length ? `Sent to ${r.sent}. FAILED for: ${esc(r.failed.join(', '))}` : `Sent to ${r.sent} players.`, r.failed.length ? 'bad' : 'ok'); }
+    catch (e) { msg($('bc-msg'), esc(e.message), 'bad'); }
+    $('bc-send').disabled = false;
+    loadBroadcasts();
   };
   $('test-go').onclick = async () => {
     msg($('test-msg'), 'Sending…');
     try { const r = await api('test-email', { to: $('test-to').value.trim() }); msg($('test-msg'), 'Sent. Resend id: ' + esc(r.id), 'ok'); }
     catch (e) { msg($('test-msg'), esc(e.message), 'bad'); }
   };
-  load();
+  load().then(() => key && loadBroadcasts().catch(() => {}));
 })();
