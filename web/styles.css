@@ -334,7 +334,7 @@ body.mock .mock-only { display: block; }
 .seg-btn + .seg-btn { border-left: 1.5px solid var(--cream); }
 .seg-btn.on { background: var(--cream); color: var(--ink); }
 .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px; }
-.gpanel { background: var(--paper); color: var(--ink); border: 2px solid var(--cream); box-shadow: 8px 8px 0 var(--gacc); min-width: 0; }
+.gpanel { background: var(--paper); color: var(--ink); border: 2px solid var(--cream); box-shadow: 8px 8px 0 var(--gacc); min-width: 0; display: flex; flex-direction: column; }
 .gpanel-head { padding: 18px 20px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
 .gpanel-title { display: flex; align-items: center; gap: 10px; }
 .gid { width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center; background: var(--gacc); border: 1.5px solid var(--ink); font-family: var(--grot); font-weight: 700; font-size: 15px; }
@@ -366,7 +366,7 @@ tr.q .grank { background: var(--gacc); border-color: var(--ink); }
 .xchip.self { background: var(--ink); }
 .xchip.none { border: 1px dashed var(--line); color: #a39b8a; }
 .gtable td.x { padding: 3px 2px; text-align: center; }
-.gpanel-foot { padding: 10px 16px; border-top: 1px solid rgba(28,26,23,0.15); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; }
+.gpanel-foot { margin-top: auto; padding: 10px 16px; border-top: 1px solid rgba(28,26,23,0.15); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; }
 .gpanel-foot .sw { display: inline-flex; align-items: center; gap: 8px; }
 .gpanel-foot .sw::before { content: ''; width: 10px; height: 10px; background: var(--gacc); border: 1px solid var(--ink); }
 .group-note { margin-top: 20px; font-size: 12px; color: rgba(239,230,210,0.7); }
