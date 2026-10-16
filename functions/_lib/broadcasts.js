@@ -6,7 +6,8 @@
 import { bad } from './http.js';
 import { getSetting, listGames } from './db.js';
 import { templates } from './mail.js';
-import { progressStats, playerProgress } from './progress.js';
+import { GROUPS } from './tournament.js';
+import { progressStats, playerProgress, groupProgress } from './progress.js';
 
 export const broadcasts = {
   progress: {
@@ -17,6 +18,15 @@ export const broadcasts = {
       return { players, games, stats: progressStats(env, players, games) };
     },
     build: (env, ctx, player) => templates.progress(env, { player, stats: ctx.stats, ...playerProgress(ctx.players, ctx.games, player.id) }),
+  },
+  finalPush: {
+    label: 'Final push: group progress bars + thanks',
+    async prepare(db, env, players) {
+      if ((await getSetting(db, 'phase')) !== 'play') throw bad('Only available once the group stage is running', 409);
+      const games = await listGames(db);
+      return { players, games, groups: groupProgress(players, games, GROUPS) };
+    },
+    build: (env, ctx, player) => templates.finalPush(env, { player, groups: ctx.groups, players: ctx.players.length, ...playerProgress(ctx.players, ctx.games, player.id) }),
   },
   formatChange: {
     label: 'Format update: two groups, then a knockout',

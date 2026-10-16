@@ -23,3 +23,13 @@ export function playerProgress(players, games, id) {
   const remaining = open.map((g) => players.find((x) => x.id === (g.p1 === id ? g.p2 : g.p1))).filter(Boolean);
   return { played: mine.length - open.length, left: open.length, remaining };
 }
+
+// Per-group progress for the final-push email: [{ key, name, full, done, total, left, pct }].
+export function groupProgress(players, games, GROUPS) {
+  return Object.entries(GROUPS).map(([key, g]) => {
+    const ids = new Set(players.filter((p) => p.grp === key).map((p) => p.id));
+    const mine = games.filter((x) => x.round === 1 && ids.has(x.p1));
+    const done = mine.filter((x) => x.status === 'confirmed').length;
+    return { key, name: g.name, full: g.full, done, total: mine.length, left: mine.length - done, pct: mine.length ? Math.round((done / mine.length) * 100) : 0 };
+  });
+}

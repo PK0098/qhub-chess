@@ -188,6 +188,62 @@ Your page: ${url}`,
     };
   },
 
+  // Final-push nudge near the end of the group stage. groups: from groupProgress().
+  // played / left / remaining: this player's own group games, as in `progress`.
+  finalPush(env, { player, groups, players, played, left, remaining }) {
+    const url = meLink(env, player.token);
+    const deadline = '23 October';
+    const done = groups.reduce((n, g) => n + g.done, 0);
+    const total = groups.reduce((n, g) => n + g.total, 0);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const lead = [...groups].sort((a, b) => b.pct - a.pct)[0];
+    const other = groups.find((g) => g !== lead);
+    const bar = (p, color) => `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:2px solid #1c1a17;margin:5px 0 3px"><tr>
+        <td width="${p}%" style="background:${color};height:20px;font-size:0;line-height:0">&nbsp;</td>
+        <td style="background:#faf6ec;height:20px;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+    const groupBar = (g) => `<div style="margin:0 0 14px">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+        <td style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:15px">${esc(g.full)}${g === lead && other ? ' <span style="font-size:11px;color:#e0552b">&#9818; in the lead</span>' : ''}</td>
+        <td align="right" style="font-size:12px;color:#5c5548"><strong style="color:#1c1a17">${g.done}/${g.total}</strong> games &middot; ${g.pct}%</td></tr></table>
+      ${bar(g.pct, '#e0552b')}
+      <div style="font-size:12px;color:#5c5548">${g.left ? `${g.left} game${g.left === 1 ? '' : 's'} to go` : 'All done. Take a bow.'}</div>
+    </div>`;
+    const n = played + left;
+    const myPct = n ? Math.round((played / n) * 100) : 0;
+    const you = `<div style="border:2px solid #1c1a17;background:${left ? '#faf6ec' : '#e4f1e4'};padding:14px 14px 10px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+        <td style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:15px">You, ${esc(first(player.name))}${left ? '' : ' <span style="font-size:11px;color:#2e7d4f">&#10003; group stage complete</span>'}</td>
+        <td align="right" style="font-size:12px;color:#5c5548"><strong style="color:#1c1a17">${played}/${n}</strong> games &middot; ${myPct}%</td></tr></table>
+      ${bar(myPct, left ? '#e0552b' : '#2e7d4f')}
+      <div style="font-size:12px;color:#5c5548">${left ? `${left} game${left === 1 ? '' : 's'} to go` : 'All played. You can relax, heckle, and cheer.'}</div>
+    </div>`;
+    const list = remaining.length
+      ? `<p style="margin:0 0 6px"><strong>Still on your list:</strong></p>
+        <ul style="padding-left:18px;margin:0 0 14px">${remaining.map((o) => `<li style="margin:4px 0">${opponentLine(o)}</li>`).join('')}</ul>`
+      : '';
+    return {
+      subject: left ? `Final push: ${left} game${left === 1 ? '' : 's'} to play before ${deadline}` : `Final push: group stage ends ${deadline} (you're already done)`,
+      html: layout(`${pct}% there. Let's land this thing.`, `
+        <p>Hi ${esc(first(player.name))}. Quick one from tournament HQ, and it starts with a thank you. ${esc(String(players))} of you signed up for something that was a flyer and a hunch a month ago, and between you you've played <strong>${done} games of chess</strong>. The kitchen chess sets have seen more action this month than in their entire previous lives. That's you. Thank you.</p>
+        <p>Now the scoreboard, group by group:</p>
+        <div style="border:2px solid #1c1a17;background:#efe6d2;padding:14px 14px 2px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17">${groups.map(groupBar).join('')}</div>
+        ${other ? `<p><strong>${esc(lead.full)} is ahead by a nose.</strong> ${esc(other.full)}, no pressure, but the whole building is watching.</p>` : ''}
+        <p><strong>The final push, with a date on it.</strong> The group stage ends on <strong>${deadline}</strong>. At the end of that day the top two of each group advance to the semi-finals, whatever is left on the board. There are <strong>${total - done} games</strong> to go in total, so one game each this week and next gets us there. A game is 20 minutes, tops. That's one long coffee break with a slightly higher pulse.</p>
+        ${you}
+        ${list}
+        <p>Finding an opponent is the easy part: say hi in the Telegram group, or email someone from your list and pick a time. Lunch hour and end of day both work. Then tap the result on your player page and you're done.</p>
+        <p style="margin:12px 0"><a href="https://t.me/+_gfRxTIi3tBkNGFk" style="display:inline-block;background:#2b3f6b;color:#faf6ec;padding:12px 20px;border:2px solid #1c1a17;font-weight:700;text-decoration:none">Open the Telegram group &rarr;</a></p>
+        ${button(url, 'Your player page')}
+        <p>Go forth and castle.</p>`),
+      text: `Hi ${first(player.name)}. Thank you: ${players} of you signed up and ${done} games have been played.
+Scoreboard:
+${groups.map((g) => `- ${g.full}: ${g.done}/${g.total} games (${g.pct}%), ${g.left} to go`).join('\n')}
+The group stage ends on ${deadline}. At the end of that day the top two of each group advance to the semi-finals. ${total - done} games to go in total.
+You: ${played}/${n} played${left ? `, ${left} to go. Still on your list: ${remaining.map((o) => `${o.name} (${o.email})`).join(', ')}.` : '. All done!'}
+Telegram: https://t.me/+_gfRxTIi3tBkNGFk
+Your page: ${url}`,
+    };
+  },
   reported(env, { player, reporter, outcomeText, gameId }) {
     const url = gameLink(env, player.token, gameId);
     return {
