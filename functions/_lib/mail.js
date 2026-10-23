@@ -84,27 +84,32 @@ export const templates = {
     };
   },
 
-  // stage: 'group' | 'semi' | 'final' | 'third'. games: [{id, opponent:{name,company,email}}]
+  // stage: 'group' | 'semi' | 'final' | 'third' | 'decider'. games: [{id, white, opponent:{name,company,email}}]
+  // Knockout stages list game 1 of the series (game 2 swaps colours); 'decider' lists game 3.
   pairings(env, { player, stage, games }) {
     const grp = groupName(player.grp);
+    const colour = (g) => stage === 'group' ? '' : stage === 'decider'
+      ? `<br>Game 3 (Armageddon): the coin says you have <strong>${g.white ? 'White' : 'Black'}</strong>.`
+      : `<br>Game 1: you have <strong>${g.white ? 'White' : 'Black'}</strong>. Game 2: you swap.`;
     const rows = games.map((g) =>
-      `<li style="margin:8px 0">${opponentLine(g.opponent)}<br><a href="${esc(gameLink(env, player.token, g.id))}" style="color:#2b3f6b">Report this result</a></li>`).join('');
-    const stageName = { semi: 'Semi-final', final: 'The final', third: 'Third-place game' }[stage];
-    const title = stage === 'group' ? `Pairings are out. You're in ${esc(grp)}.` : `${stageName}: your opponent.`;
+      `<li style="margin:8px 0">${opponentLine(g.opponent)}${colour(g)}<br><a href="${esc(gameLink(env, player.token, g.id))}" style="color:#2b3f6b">Report ${stage === 'group' ? 'this result' : 'your results'}</a></li>`).join('');
+    const stageName = { semi: 'Semi-final', final: 'The final', third: 'Third-place match', decider: 'Game 3' }[stage];
+    const title = stage === 'group' ? `Pairings are out. You're in ${esc(grp)}.` : stage === 'decider' ? `1–1. Time for Armageddon.` : `${stageName}: your opponent.`;
     const intro = {
       group: `<p>Registration is closed and the hat has spoken: you're in <strong>${esc(grp)}</strong>. Play everyone in your group once. Win 3, draw 1, loss 0, excuses 0. The top two go to the semi-finals.</p>`,
-      semi: `<p>Top two in your group. Nice. The semi-final is one game: win it and you play the final, lose it and you play for bronze (still a medal, still bragging rights).</p>`,
-      final: `<p>You won your semi. One more game and it's your name on the site for a whole year. No pressure.</p>`,
-      third: `<p>The semi didn't go your way, but bronze is still up for grabs. One game, one podium spot.</p>`,
+      semi: `<p>Top two in your group. Nice. The semi-final is a best of 3: win it and you play the final, lose it and you play for bronze (still a medal, still bragging rights).</p>`,
+      final: `<p>You won your semi. One more match and it's your name on the site for a whole year. No pressure.</p>`,
+      third: `<p>The semi didn't go your way, but bronze is still up for grabs. One match, one podium spot.</p>`,
+      decider: `<p>Your match is level after two games, so one game decides it. Both players get 10 minutes. <strong>If it's a draw, Black goes through.</strong> So White has to win, and Black just has to not lose.</p>`,
     }[stage];
     const replyTo = games.map((g) => g.opponent.email);
     const howTo = `<p>Email your opponent${games.length > 1 ? 's' : ''} to pick a time. Chess sets live in the kitchens on floors 4 and 5. Bring a phone with a chess clock app set to 10+0. Snacks optional but encouraged.</p>`;
     const tgUrl = 'https://t.me/+_gfRxTIi3tBkNGFk';
     const telegram = stage === 'group' ? `<p>Can't find your opponent, or no reply yet? Join the tournament Telegram channel: <a href="${tgUrl}" style="color:#2b3f6b">${tgUrl}</a>. Everyone can hang out there, so it's the easiest way to track down your opponents and set up games.</p>` : '';
-    const noDraw = stage === 'group' ? '' : `<p><strong>No draws from here on.</strong> If a game is drawn, play again until someone cracks, then report that result.</p>`;
+    const noDraw = stage === 'group' || stage === 'decider' ? '' : `<p><strong>How the match works.</strong> Two games, 10 minutes each, and each player has White once. A win is 1 point, a draw ½. After two games the higher score goes through. At 1–1 the site flips a coin for colours and you play game 3 (Armageddon): 10 minutes each, and a draw means Black goes through. So never more than 3 games. Report every game on your player page.</p>`;
     const reporting = `<p>Either player reports the result. The other confirms. Silence for ${esc(env.CONFIRM_HOURS)} hours counts as a confirmation, so don't ghost your opponent.</p>`;
     return {
-      subject: stage === 'group' ? `Pairings are out — you're in ${grp}` : `${stageName}: your opponent`,
+      subject: stage === 'group' ? `Pairings are out — you're in ${grp}` : stage === 'decider' ? `It's 1–1: game 3 (Armageddon) decides` : `${stageName}: your opponent`,
       replyTo: replyTo.length === 1 ? replyTo[0] : undefined,
       html: layout(title, `${intro}
         ${howTo}
@@ -113,7 +118,7 @@ export const templates = {
         ${noDraw}
         ${reporting}
         ${button(meLink(env, player.token), 'Your player page')}`),
-      text: `${title}\n${games.map((g) => `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}`).join('\n')}${stage === 'group' ? `\nCan't find your opponent? Join the Telegram channel: ${tgUrl}` : '\nNo draws: a drawn game is replayed until someone wins.'}\nYour page: ${meLink(env, player.token)}`,
+      text: `${title}\n${games.map((g) => `- ${g.opponent.name} (${g.opponent.company}) ${g.opponent.email}\n  report: ${gameLink(env, player.token, g.id)}`).join('\n')}${stage === 'group' ? `\nCan't find your opponent? Join the Telegram channel: ${tgUrl}` : stage === 'decider' ? '\nGame 3, Armageddon: 10 minutes each, a draw means Black goes through.' : '\nBest of 3: two games (White once each, draw = 1/2). At 1-1 a game 3 Armageddon decides (draw = Black goes through).'}\nYour page: ${meLink(env, player.token)}`,
     };
   },
 
@@ -244,6 +249,65 @@ Telegram: https://t.me/+_gfRxTIi3tBkNGFk
 Your page: ${url}`,
     };
   },
+  // One-off after the organizer ends the group stage. tables: { P, A } ordered rows.
+  // semis: [series SF1, series SF2] from seriesOf. played / closed: group game counts.
+  groupsEnded(env, { player, tables, byId, semis, played, closed }) {
+    const url = meLink(env, player.token);
+    const deadline = 'Friday 6 November';
+    const nm = (id) => (byId.get(id) || {}).name || '?';
+    const groupBox = (key) => {
+      const rows = tables[key] || [];
+      const tied = rows.length > 1 && rows[0].points === rows[1].points;
+      const line = (r, i) => `<tr><td style="padding:4px 0;width:34px;font-weight:700;color:#e0552b">${key}${i + 1}</td><td style="padding:4px 0"><strong>${esc(nm(r.id))}</strong></td><td align="right" style="padding:4px 0;font-size:12px;color:#5c5548">${r.points} pts &middot; ${r.played} games</td></tr>`;
+      return `<div style="margin:0 0 12px">
+        <div style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:15px;margin-bottom:2px">${esc(GROUPS[key].full)}</div>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows.slice(0, 2).map(line).join('')}</table>
+        ${tied ? `<div style="font-size:12px;color:#5c5548">Level on points. The tiebreak (head-to-head, then wins, then the drawing of lots) decided who is ${key}1.</div>` : ''}
+      </div>`;
+    };
+    const sf = (s, i) => `<tr><td style="padding:6px 0;width:44px;font-weight:700">SF${i + 1}</td><td style="padding:6px 0"><strong>${esc(nm(s.a))}</strong> <span style="color:#5c5548">vs</span> <strong>${esc(nm(s.b))}</strong></td></tr>`;
+    const mine = semis.find((s) => s.a === player.id || s.b === player.id);
+    const opp = mine ? byId.get(mine.a === player.id ? mine.b : mine.a) : null;
+    const you = opp
+      ? `<div style="border:2px solid #1c1a17;background:#e4f1e4;padding:12px 14px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17">
+          <div style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:16px">&#9818; You're in the semis, ${esc(first(player.name))}!</div>
+          <div style="margin-top:6px">Your opponent: ${opponentLine(opp)}. You have <strong>${mine.a === player.id ? 'White' : 'Black'}</strong> in game 1. A separate email with your report links is in your inbox too.</div></div>`
+      : `<div style="border:2px solid #1c1a17;background:#efe6d2;padding:12px 14px;margin:0 0 16px">
+          <div style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:15px">Your tournament run ends here, ${esc(first(player.name))}.</div>
+          <div style="margin-top:6px">But the fun doesn't. Cheer for your favourite, watch the bracket, and practise your best "I would have played Nf5 there" face.</div></div>`;
+    return {
+      subject: `Group stage: game over. Meet the final four ♞`,
+      html: layout(`The groups are done. Four players remain.`, `
+        <p>Hi ${esc(first(player.name))}. Beep boop, tournament HQ here. The group stage clock hit 0:00 on 23 October. Together you played <strong>${played} games</strong>. That's a lot of coffee breaks turned into chess. Thank you!</p>
+        ${closed ? `<p>${closed} game${closed === 1 ? ' was' : 's were'} still on the board at the deadline. Those are now closed: no points for anyone, no hard feelings.</p>` : ''}
+        <p style="margin:0 0 6px"><strong>Who goes through:</strong></p>
+        <div style="border:2px solid #1c1a17;background:#faf6ec;padding:12px 14px 2px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17">${groupBox('P')}${groupBox('A')}</div>
+        <p style="margin:0 0 6px"><strong>The semi-finals</strong> (group winner vs the other group's runner-up):</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;border-top:1px solid #1c1a17;border-bottom:1px solid #1c1a17">${semis.map(sf).join('')}</table>
+        ${you}
+        <p style="margin:0 0 6px"><strong>Semi rules: best of 3, never more than 3 games.</strong></p>
+        <ol style="padding-left:20px;margin:0 0 14px">
+          <li style="margin:6px 0"><strong>Games 1 and 2:</strong> each player has White once. 10 minutes each, no increment. Win = 1 point, draw = ½.</li>
+          <li style="margin:6px 0">After two games, the higher score goes through (2–0 or 1½–½).</li>
+          <li style="margin:6px 0"><strong>1–1?</strong> Game 3 is <strong>Armageddon</strong>. The site flips a coin for colours, both get 10 minutes, and <strong>a draw means Black goes through</strong>. So there is always a winner.</li>
+          <li style="margin:6px 0">Report every game on your player page, same as before.</li>
+        </ol>
+        <p><strong>Deadline: end of ${deadline}.</strong> That's two weeks for at most three games. Very doable, even with a full calendar.</p>
+        <p>After that: the <strong>final</strong> and the <strong>bronze match</strong>, with the same best-of-3 rules. Dates follow.</p>
+        ${button(url, 'Your player page')}
+        <p>May your forks be royal and your flags never fall.</p>`),
+      text: `Hi ${first(player.name)}. The group stage ended on 23 October after ${played} games.${closed ? ` ${closed} unplayed games are closed (no points).` : ''}
+Through to the semis:
+${['P', 'A'].map((k) => (tables[k] || []).slice(0, 2).map((r, i) => `- ${k}${i + 1} ${nm(r.id)} (${r.points} pts, ${GROUPS[k].full})`).join('\n')).join('\n')}
+Semi-finals:
+${semis.map((s, i) => `- SF${i + 1}: ${nm(s.a)} vs ${nm(s.b)}`).join('\n')}
+${opp ? `You're in! Your opponent: ${opp.name} (${opp.email}). You have ${mine.a === player.id ? 'White' : 'Black'} in game 1.` : 'Your run ends here, but come cheer.'}
+Semi rules: best of 3. Games 1 and 2: White once each, 10 minutes, win 1, draw 1/2. Higher score after two games goes through. At 1-1, game 3 is Armageddon: coin toss for colours, 10 minutes each, a draw means Black goes through.
+Deadline: end of ${deadline}. Then the final and bronze match, same rules.
+Your page: ${url}`,
+    };
+  },
+
   reported(env, { player, reporter, outcomeText, gameId }) {
     const url = gameLink(env, player.token, gameId);
     return {

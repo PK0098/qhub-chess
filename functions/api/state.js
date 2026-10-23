@@ -1,6 +1,6 @@
 import { json, handle } from '../_lib/http.js';
 import { getSetting, listPlayers, listGames, publicPlayer, publicGame } from '../_lib/db.js';
-import { sweep, groupTables } from '../_lib/sweep.js';
+import { sweep, groupTables, publicSeries } from '../_lib/sweep.js';
 
 export const onRequestGet = handle(async ({ env }) => {
   const db = env.DB;
@@ -21,5 +21,6 @@ export const onRequestGet = handle(async ({ env }) => {
     confirmHours: Number(env.CONFIRM_HOURS || 48),
     players: players.map(publicPlayer),
     games: games.map(publicGame),
+    series: publicSeries(games),
   });
 });

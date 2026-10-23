@@ -38,9 +38,12 @@
       <div>Phase<b>${esc(phase)}</b></div><div>Format<b>${d.settings.format ? 'groups' : '—'}</b></div>
       <div>Players<b>${d.players.length}</b></div><div>Games confirmed<b>${d.games.filter((g) => g.status === 'confirmed' && g.p2 !== null).length} / ${d.games.filter((g) => g.p2 !== null).length}</b></div>
       <div>Groups P / A<b>${d.players.filter((p) => p.grp === 'P').length} / ${d.players.filter((p) => p.grp === 'A').length}</b></div>
-      <div>Flyer scans<b>${esc(d.settings.flyer_scans || 0)}</b></div><div>Announced<b style="font-size:12px">${esc(d.settings.announced_at ? d.settings.announced_at.slice(0, 16).replace('T', ' ') : 'not yet')}</b></div><div>Closes<b style="font-size:13px">${esc(d.vars.CLOSE_DATE)}</b></div>
+      <div>Flyer scans<b>${esc(d.settings.flyer_scans || 0)}</b></div><div>Announced<b style="font-size:12px">${esc(d.settings.announced_at ? d.settings.announced_at.slice(0, 16).replace('T', ' ') : 'not yet')}</b></div><div>Closes<b style="font-size:13px">${esc(d.vars.CLOSE_DATE)}</b></div><div>Groups ended<b style="font-size:12px">${esc(d.settings.groups_ended_at ? d.settings.groups_ended_at.slice(0, 16).replace('T', ' ') : 'not yet')}</b></div>
       <div>Mail from<b style="font-size:12px">${esc(d.vars.MAIL_FROM)}</b></div><div>Site<b style="font-size:12px">${esc(d.vars.SITE_URL)}</b></div>`;
     $('close-btn').disabled = phase !== 'registration' || d.players.length < 4;
+    $('end-btn').disabled = phase !== 'play' || !!d.settings.groups_ended_at;
+    $('end-btn').hidden = phase === 'registration';
+    pendingGroup = d.games.filter((g) => g.round === 1 && g.status !== 'confirmed').length;
 
     $('pcount').textContent = d.players.length;
     $('players').innerHTML = `<tr><th>Code</th><th>Name</th><th>Grp</th><th>Company</th><th>Email</th><th>Photo</th><th></th></tr>` +
@@ -52,7 +55,7 @@
       d.games.map((g) => `<tr><td>${g.id}</td><td>${g.round}</td><td>${name(g.p1)}</td><td>${name(g.p2)}</td>
         <td><span class="tag ${esc(g.status)}">${esc(g.status)}</span>${g.reported_by ? `<div style="font-size:11px;color:#5c5548">by ${name(g.reported_by)}</div>` : ''}</td>
         <td>${esc(g.result || '—')}</td>
-        <td>${g.p2 === null ? '' : `<select data-res="${g.id}"><option value="1-0">1-0 (p1 wins)</option><option value="0-1">0-1 (p2 wins)</option>${g.round >= 2 ? '' : '<option value="1/2">½-½</option>'}</select> <button class="btn btn-dark sm" data-resolve="${g.id}">Set</button>`}</td></tr>`).join('');
+        <td>${g.p2 === null ? '' : `<select data-res="${g.id}"><option value="1-0">1-0 (p1 wins)</option><option value="0-1">0-1 (p2 wins)</option><option value="1/2">½-½</option></select> <button class="btn btn-dark sm" data-resolve="${g.id}">Set</button>`}</td></tr>`).join('');
 
     const ob = d.outbox || [];
     $('outbox-box').hidden = ob.length === 0;
@@ -86,6 +89,14 @@
     try { const r = await api('close', {}); msg($('msg'), `Closed. ${r.players} players: Petrosian ${r.groups.P}, Aronian ${r.groups.A}. ${r.games} games created. Emails sent: ${r.mail.sent}.${r.mail.failed.length ? ' FAILED for: ' + esc(r.mail.failed.join(', ')) : ''}`, r.mail.failed.length ? 'bad' : 'ok'); }
     catch (e) { msg($('msg'), esc(e.message), 'bad'); }
     load();
+  };
+  let pendingGroup = 0;
+  $('end-btn').onclick = async () => {
+    if (!confirm(`End the group stage now? ${pendingGroup} unfinished group game(s) get locked: reported ones count, pending and disputed ones are closed with no points. The semis are created and the 4 semi-finalists get their pairings email. This cannot be undone.`)) return;
+    $('end-btn').disabled = true;
+    try { const r = await api('end-groups', {}); msg($('msg'), `Group stage ended. ${r.counted} reported game(s) counted, ${r.closed} closed. ${r.semis} semi games created. Now send the 'Group stage over' email below.`, 'ok'); }
+    catch (e) { msg($('msg'), esc(e.message), 'bad'); }
+    load(); loadBroadcasts().catch(() => {});
   };
   let bcList = [];
   async function loadBroadcasts() {

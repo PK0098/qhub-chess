@@ -102,18 +102,57 @@ export function semiPairings(tableP, tableA) {
   ];
 }
 
+// Knockout rounds (2 = semis, 3 = final slot 0 / third place slot 1) are series.
+// In every knockout game p1 has White. Games 1 and 2 swap colours and score
+// 1 / ½ / 0; the higher score goes through. At 1–1 a game 3 (Armageddon) is
+// added with random colours, and a draw there sends Black (p2) through.
+// A game's number in its series is its order by id.
+
+// Games 1 and 2 of a series between a and b (a has White first).
+export function seriesLegs(round, slot, a, b) {
+  return [{ round, slot, p1: a, p2: b }, { round, slot, p1: b, p2: a }];
+}
+
+// Game 3 of a series, colours by coin toss. rand: () => [0, 1).
+export function deciderLeg(series, rand = Math.random) {
+  const [w, bl] = rand() < 0.5 ? [series.a, series.b] : [series.b, series.a];
+  return { round: series.round, slot: series.slot, p1: w, p2: bl };
+}
+
+// State of one series, or null if it has no games yet.
+// score: [a, b] including the decider. winner/loser: ids once decided.
+export function seriesOf(games, round, slot) {
+  const legs = games.filter((g) => g.round === round && g.slot === slot).sort((x, y) => x.id - y.id);
+  if (!legs.length) return null;
+  const a = legs[0].p1, b = legs[0].p2;
+  const done = (g) => g && g.status === 'confirmed' && g.result;
+  const pts = { [a]: 0, [b]: 0 };
+  for (const g of legs.slice(0, 2).filter(done)) {
+    if (g.result === '1/2') { pts[a] += 0.5; pts[b] += 0.5; } else pts[winnerOf(g)] += 1;
+  }
+  let winner = null, needDecider = false;
+  if (legs.length >= 2 && legs.slice(0, 2).every(done)) {
+    if (pts[a] !== pts[b]) winner = pts[a] > pts[b] ? a : b;
+    else {
+      needDecider = true;
+      const d = legs[2];
+      if (done(d)) { winner = d.result === '1-0' ? d.p1 : d.p2; pts[winner] += 1; }
+    }
+  }
+  return {
+    round, slot, a, b, legs, needDecider, winner,
+    loser: winner === null ? null : winner === a ? b : a,
+    score: [pts[a], pts[b]],
+    played: legs.filter(done).length,
+  };
+}
+
 // Round 3: final (slot 0) between semi winners, third place (slot 1) between
-// semi losers. Null until both semis are confirmed with a winner.
-export function finalPairings(semis) {
-  const s = semis.filter((g) => g.round === 2).sort((a, b) => a.slot - b.slot);
-  if (s.length !== 2) return null;
-  const w = s.map(winnerOf);
-  if (w.some((x) => x === null)) return null;
-  const l = s.map((g, i) => (w[i] === g.p1 ? g.p2 : g.p1));
-  return [
-    { round: 3, slot: 0, p1: w[0], p2: w[1] },
-    { round: 3, slot: 1, p1: l[0], p2: l[1] },
-  ];
+// semi losers. Null until both semi series are decided.
+export function finalPairings(games) {
+  const s = [seriesOf(games, 2, 0), seriesOf(games, 2, 1)];
+  if (s.some((x) => !x || x.winner === null)) return null;
+  return [...seriesLegs(3, 0, s[0].winner, s[1].winner), ...seriesLegs(3, 1, s[0].loser, s[1].loser)];
 }
 
 export function toP1Result(youAre, outcome) {

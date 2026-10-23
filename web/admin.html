@@ -33,7 +33,7 @@
   .msg.bad { background: var(--orange); }
   .msg.ok { background: var(--green); }
   .tag { display: inline-block; padding: 2px 6px; font-size: 11px; border: 1px solid var(--ink); }
-  .tag.confirmed { background: var(--ink); color: var(--cream); } .tag.reported { background: var(--gold); } .tag.disputed { background: var(--orange); }
+  .tag.confirmed { background: var(--ink); color: var(--cream); } .tag.reported { background: var(--gold); } .tag.disputed { background: var(--orange); } .tag.closed { opacity: 0.5; text-decoration: line-through; }
 </style>
 </head>
 <body data-phase="play">
@@ -52,6 +52,7 @@
     <div class="box"><h2>Status</h2><div class="kv" id="kv"></div>
       <div class="row" style="margin-top:14px">
         <button class="btn btn-orange" id="close-btn">Close registration &amp; create pairings →</button>
+        <button class="btn btn-dark" id="end-btn">End group stage &amp; create semis →</button>
         <button class="btn btn-line sm" id="refresh">Refresh</button>
       </div>
       <div id="msg"></div>
@@ -69,6 +70,6 @@
     <div class="box"><h2>Test email</h2><div class="row"><input type="email" id="test-to" placeholder="you@example.com" style="flex:1 1 240px"><button class="btn btn-line sm" id="test-go">Send test</button></div><div id="test-msg"></div></div>
   </div>
 </main>
-<script src="admin.js?v=202610051400"></script>
+<script src="admin.js?v=202610231200"></script>
 </body>
 </html>

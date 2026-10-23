@@ -11,10 +11,10 @@ export const onRequestPost = handle(async ({ request, env }) => {
   if ((await getSetting(db, 'phase')) !== 'play') throw bad('The tournament is not in play', 403);
   const g = await gameForPlayer(db, body.g, me);
   if (g.p2 === null) throw bad('This is a bye', 400);
+  if (g.status === 'closed') throw bad('The group stage is over; this game was not played', 409);
   if (g.status === 'confirmed') throw bad('This result is already confirmed', 409);
   if (g.status === 'disputed') throw bad('This game is disputed; the organizer will settle it', 409);
   if (g.status === 'reported' && g.reported_by !== me.id) throw bad('Your opponent already reported; please confirm or dispute instead', 409);
-  if (body.result === 'draw' && g.round >= 2) throw bad('No draws in the knockout: play again until someone wins', 400);
   let result;
   try { result = toP1Result(g.p1 === me.id ? 'p1' : 'p2', body.result); } catch { throw bad('Result must be win, loss or draw', 400); }
 

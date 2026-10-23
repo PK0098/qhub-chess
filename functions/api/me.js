@@ -9,14 +9,16 @@ export const onRequestGet = handle(async ({ request, env }) => {
   const { me, byId } = await playerByToken(db, t);
   await sweep(db, env);
   const [phase, format] = await Promise.all([getSetting(db, 'phase'), getSetting(db, 'format')]);
-  const { results } = await db.prepare('SELECT * FROM games WHERE p1 = ? OR p2 = ? ORDER BY round DESC, slot').bind(me.id, me.id).all();
+  const { results } = await db.prepare('SELECT * FROM games WHERE p1 = ? OR p2 = ? ORDER BY round DESC, slot, id').bind(me.id, me.id).all();
   const games = results.map((g) => {
     const youAre = g.p1 === me.id ? 'p1' : 'p2';
     const oppId = youAre === 'p1' ? g.p2 : g.p1;
     const opp = oppId === null ? null : byId.get(oppId);
     const active = phase === 'play';
+    // Number in its knockout series (1-3): order by id among this round/slot.
+    const leg = g.round === 1 ? null : results.filter((x) => x.round === g.round && x.slot === g.slot && x.id <= g.id).length;
     return {
-      id: g.id, round: g.round, slot: g.slot, youAre, result: g.result, status: g.status,
+      id: g.id, round: g.round, slot: g.slot, leg, youAre, result: g.result, status: g.status,
       opponent: opp ? publicPlayer(opp) : null,
       reportedByYou: g.reported_by === me.id,
       canReport: active && opp !== null && (g.status === 'pending' || (g.status === 'reported' && g.reported_by === me.id)),

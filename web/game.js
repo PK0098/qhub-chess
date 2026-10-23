@@ -20,7 +20,7 @@
       if (!r.ok) return;
       const { games } = await r.json();
       const group = games.filter((g) => g.round === 1);
-      const done = group.length > 0 && group.every((g) => g.status === 'confirmed');
+      const done = group.length > 0 && group.every((g) => g.status === 'confirmed' || g.status === 'closed');
       $('nav-standings').href = done ? '/#bracket' : '/#groups';
     } catch { /* keep the /#groups default */ }
   }
@@ -54,7 +54,9 @@
     const opp = g.opponent;
     const ko = g.round >= 2;
     const round = document.createElement('div'); round.className = 'g-round';
-    round.textContent = g.round === 1 ? `Group game #${g.id}` : g.round === 2 ? 'Semi-final' : g.slot === 0 ? 'Final' : 'Third place';
+    const stageName = g.round === 2 ? 'Semi-final' : g.slot === 0 ? 'Final' : 'Third place';
+    // Knockout: p1 has White. Game 3 is the Armageddon decider.
+    round.textContent = g.round === 1 ? `Group game #${g.id}` : `${stageName} · ${g.leg === 3 ? 'Game 3 · Armageddon' : 'Game ' + g.leg} · You have ${g.youAre === 'p1' ? 'White' : 'Black'}`;
     const vs = document.createElement('div'); vs.className = 'g-vs';
     vs.textContent = opp ? `vs ${opp.name}` : 'Bye';
     const sub = document.createElement('div'); sub.className = 'g-sub';
@@ -70,7 +72,8 @@
     const word = { win: 'You won', loss: 'You lost', draw: 'Draw' };
     const state = document.createElement('div'); state.className = 'g-state';
     if (!opp) { state.textContent = 'Bye.'; state.classList.add('ok'); el.appendChild(state); return el; }
-    if (g.status === 'confirmed') { state.textContent = `${word[mine(g.result)]}. Confirmed.`; state.classList.add('ok'); el.appendChild(state); return el; }
+    if (g.status === 'confirmed') { state.textContent = `${word[mine(g.result)]}${g.leg === 3 && g.result === '1/2' ? `, so Black (${g.youAre === 'p2' ? 'you' : opp.name.split(' ')[0]}) goes through` : ''}. Confirmed.`; state.classList.add('ok'); el.appendChild(state); return el; }
+    if (g.status === 'closed') { state.textContent = 'Not played. The group stage is over, so this game is closed.'; el.appendChild(state); return el; }
     if (g.status === 'disputed') { state.textContent = 'Disputed. The organizer will settle this one.'; state.classList.add('bad'); el.appendChild(state); return el; }
     if (g.status === 'reported' && g.reportedByYou) { state.textContent = `You reported: ${word[mine(g.result)].toLowerCase()}. Waiting for ${opp.name.split(' ')[0]} to confirm (auto-confirms after 48h). You can still change it below.`; state.classList.add('warn'); el.appendChild(state); }
     if (g.status === 'reported' && !g.reportedByYou) { state.textContent = `${opp.name.split(' ')[0]} reported: ${word[mine(g.result)].toLowerCase()}.`; state.classList.add('warn'); el.appendChild(state); }
@@ -98,8 +101,8 @@
         btn('Dispute', 'btn-line', (b) => { if (confirm('Dispute this result? The organizer will be notified.')) post(b, '/api/confirm', { action: 'dispute' }); }));
     } else if (g.canReport) {
       actions.append(btn('I won', 'btn-orange', (b) => post(b, '/api/report', { result: 'win' })));
-      if (!ko) actions.append(btn('Draw', 'btn-line', (b) => post(b, '/api/report', { result: 'draw' })));
-      if (ko) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = 'No draws in the knockout: a drawn game is replayed until someone wins.'; el.appendChild(h); }
+      actions.append(btn('Draw', 'btn-line', (b) => post(b, '/api/report', { result: 'draw' })));
+      if (ko) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = g.leg === 3 ? 'Armageddon: 10 minutes each. A draw means Black goes through.' : 'Best of 3: win 1, draw ½. Play both games; at 1–1 a game 3 decides.'; el.appendChild(h); }
       actions.append(btn('I lost', 'btn-dark', (b) => post(b, '/api/report', { result: 'loss' })));
     }
     if (actions.children.length) el.appendChild(actions);

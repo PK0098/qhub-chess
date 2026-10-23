@@ -201,7 +201,6 @@
     A: { name: 'Aronian', full: 'Group Aronian', accent: '#d9a92f', piece: '♛', note: 'Levon Aronian. World Cup winner 2005 and 2017, three Olympiad golds with Armenia.' },
   };
   const NUM = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
-  const winnerOf = (g) => (g && g.status === 'confirmed' ? (g.result === '1-0' ? g.p1 : g.result === '0-1' ? g.p2 : null) : null);
 
   function initPlay(state) {
     const players = decorate(state.players);
@@ -211,11 +210,13 @@
     const groupGames = games.filter((g) => g.round === 1);
     const groupPlayed = groupGames.filter((g) => g.status === 'confirmed').length;
     const played = games.filter((g) => g.status === 'confirmed').length;
-    const total = groupGames.length + 4;
+    const total = groupGames.filter((g) => g.status !== 'closed').length + 4;
     const sizeP = players.filter((p) => p.grp === 'P').length, sizeA = n - sizeP;
-    const groupsDone = groupGames.length > 0 && groupPlayed === groupGames.length;
-    const final = games.find((g) => g.round === 3 && g.slot === 0);
-    const stage = state.phase === 'done' || winnerOf(final) ? 'finished' : groupsDone ? 'semis' : 'groups';
+    // 'closed' = left unplayed when the organizer ended the group stage.
+    const groupsDone = groupGames.length > 0 && groupGames.every((g) => g.status === 'confirmed' || g.status === 'closed');
+    const series = state.series || [];
+    const final = series.find((s) => s.round === 3 && s.slot === 0);
+    const stage = state.phase === 'done' || (final && final.winner) ? 'finished' : groupsDone ? 'semis' : 'groups';
 
     $('play-count').textContent = n;
     $('play-group-size').textContent = sizeP === sizeA ? sizeP : `${sizeP} and ${sizeA}`;
@@ -238,7 +239,7 @@
     $('view-table').onclick = () => { view = 'table'; $('view-table').classList.add('on'); $('view-cross').classList.remove('on'); draw(); };
     $('view-cross').onclick = () => { view = 'cross'; $('view-cross').classList.add('on'); $('view-table').classList.remove('on'); draw(); };
     draw();
-    renderBracket(games, groups, byId, stage, groupsDone);
+    renderBracket(series, groups, byId, stage, groupsDone);
 
     let filter = 'all';
     const tiles = () => renderTiles(players.filter((p) => filter === 'all' || p.grp === filter), { sub: (p) => p.tag || p.company, claim: false, gtag: true });
@@ -257,8 +258,8 @@
     const sizes = sizeP === sizeA ? `2 groups of ${sizeP}` : `groups of ${sizeP} and ${sizeA}`;
     const list = [
       { title: 'Group stage', piece: '♜', count: `${groupGames} games · ${sizes}`, body: 'Group Petrosian and Group Aronian. Inside a group, every pair plays once. Win 3 · Draw 1 · Loss 0.' },
-      { title: 'Semifinals', piece: '♞', count: '2 games', body: "Top two from each group go through. Each group winner plays the other group's runner-up: P1 vs A2, A1 vs P2." },
-      { title: 'Final & 3rd place', piece: '♔', count: '2 games · 1 champion', body: 'Semifinal winners play the final. Semifinal losers play for third place. No draws: replay until someone wins.' },
+      { title: 'Semifinals', piece: '♞', count: '2 matches · best of 3', body: "Top two from each group go through. Each group winner plays the other group's runner-up: P1 vs A2, A1 vs P2. Best of 3: two games, White once each; at 1–1 an Armageddon game 3 decides." },
+      { title: 'Final & 3rd place', piece: '♔', count: '2 matches · 1 champion', body: 'Semifinal winners play the final. Semifinal losers play for third place. Same best-of-3 rules.' },
     ];
     const wrap = $('stages'); wrap.innerHTML = '';
     list.forEach((s, i) => {
@@ -286,9 +287,10 @@
       const panel = document.createElement('div'); panel.className = 'gpanel'; panel.style.setProperty('--gacc', meta.accent);
       const mine = groupGames.filter((g) => g.p2 !== null && rows.some((r) => r.id === g.p1));
       const done = mine.filter((g) => g.status === 'confirmed').length;
+      const closedN = mine.filter((g) => g.status === 'closed').length;
       panel.innerHTML = `<div class="gpanel-head"><div><div class="gpanel-title"><span class="gid">${key}</span><span class="gname">${meta.full}</span></div><div class="gnote">${meta.note}</div></div><div class="gpiece">${meta.piece}</div></div>
         <div class="table-scroll"><table class="gtable"><thead><tr></tr></thead><tbody></tbody></table></div>
-        <div class="gpanel-foot"><span class="sw">Top 2 go to the semis</span><span>${groupsDone ? 'Group complete' : `${done}/${mine.length} games played`}</span></div>`;
+        <div class="gpanel-foot"><span class="sw">Top 2 go to the semis</span><span>${groupsDone ? (closedN ? `Group closed · ${done} played` : 'Group complete') : `${done}/${mine.length} games played`}</span></div>`;
       const head = panel.querySelector('thead tr'), body = panel.querySelector('tbody');
       const nameCell = (r, i) => {
         const p = byId.get(r.id); const td = document.createElement('td');
@@ -311,6 +313,7 @@
         head.innerHTML = `<th>#</th><th>Player</th>${rows.map((_, i) => `<th class="c">${unranked ? '·' : i + 1}</th>`).join('')}<th class="pts">Pts</th>`;
         const res = new Map(); // "a-b" -> result for a
         for (const g of mine) {
+          if (g.status === 'closed') { res.set(`${g.p1}-${g.p2}`, 'n'); res.set(`${g.p2}-${g.p1}`, 'n'); continue; }
           if (g.status !== 'confirmed' || !g.result) continue;
           const a = g.result === '1-0' ? 'w' : g.result === '0-1' ? 'l' : 'd';
           res.set(`${g.p1}-${g.p2}`, a); res.set(`${g.p2}-${g.p1}`, a === 'w' ? 'l' : a === 'l' ? 'w' : 'd');
@@ -319,7 +322,7 @@
           const tr = document.createElement('tr'); tr.className = unranked ? '' : (i < 2 ? 'q' : '') + (i === 1 ? ' cut' : '');
           const p = byId.get(r.id); const short = p ? p.name.split(' ')[0] + (p.name.split(' ')[1] ? ' ' + p.name.split(' ')[1][0] + '.' : '') : '?';
           tr.innerHTML = `<td><span class="grank">${unranked ? '–' : i + 1}</span></td><td><span class="gplayer"></span></td>` +
-            rows.map((o) => { if (o.id === r.id) return '<td class="x"><span class="xchip self"></span></td>'; const k = res.get(`${r.id}-${o.id}`); return `<td class="x"><span class="xchip ${k || 'none'}">${k === 'w' ? '1' : k === 'l' ? '0' : k === 'd' ? '½' : '·'}</span></td>`; }).join('') +
+            rows.map((o) => { if (o.id === r.id) return '<td class="x"><span class="xchip self"></span></td>'; const k = res.get(`${r.id}-${o.id}`); return `<td class="x"><span class="xchip ${k || 'none'}">${k === 'w' ? '1' : k === 'l' ? '0' : k === 'd' ? '½' : k === 'n' ? '–' : '·'}</span></td>`; }).join('') +
             `<td class="pts">${r.points}</td>`;
           tr.querySelector('.gplayer').textContent = short;
           body.appendChild(tr);
@@ -329,9 +332,11 @@
     }
   }
 
-  function renderBracket(games, groups, byId, stage, groupsDone) {
+  // series: from /api/state, one per knockout match: { round, slot, a, b, score: [a, b], winner, played, needDecider }.
+  function renderBracket(series, groups, byId, stage, groupsDone) {
     const wrap = $('bracket-grid'); wrap.innerHTML = '';
-    const find = (round, slot) => games.find((g) => g.round === round && g.slot === slot) || null;
+    const find = (round, slot) => series.find((s) => s.round === round && s.slot === slot) || null;
+    const half = (x) => (x % 1 ? (Math.floor(x) || '') + '½' : String(x));
     const name = (id) => (byId.get(id) || {}).name || '?';
     const seedSlot = (key, n) => {
       const r = groupsDone ? (groups[key] || [])[n - 1] : null;
@@ -340,18 +345,18 @@
         ? { seed: key + n, name: name(r.id), sub: `${role}, ${GROUPS[key].full}` }
         : { seed: key + n, name: `${role} ${GROUPS[key].full}`, sub: 'Decided when the group ends', tbd: true };
     };
-    const fromGame = (g, i, seed, label) => g ? { seed, name: name(i === 0 ? g.p1 : g.p2), sub: label } : { seed, name: 'TBD', sub: label, tbd: true };
+    const fromGame = (g, i, seed, label) => g ? { seed, name: name(i === 0 ? g.a : g.b), sub: label } : { seed, name: 'TBD', sub: label, tbd: true };
     const mk = (cls, label, g, pair) => {
-      const win = winnerOf(g);
+      const win = g ? g.winner : null;
       const known = pair.every((s) => !s.tbd && !s.prov);
-      const status = win !== null ? '✓ Played' : g && g.status === 'reported' ? 'Awaiting confirmation' : g && g.status === 'disputed' ? 'Disputed' : known ? '● Next up' : !groupsDone ? 'After groups' : 'Waiting';
+      const status = win !== null ? '✓ Decided' : g && g.needDecider ? '● Game 3 · Armageddon' : g ? `● Best of 3 · ${g.played}/2 played` : known ? '● Next up' : !groupsDone ? 'After groups' : 'Waiting';
       const el = document.createElement('div'); el.className = 'match ' + cls + (known && win === null ? ' next' : '');
       el.innerHTML = `<div class="match-head"><span>${label}</span><span class="st">${status}</span></div>`;
       pair.forEach((s, i) => {
-        const pid = g ? (i === 0 ? g.p1 : g.p2) : null;
+        const pid = g ? (i === 0 ? g.a : g.b) : null;
         const row = document.createElement('div');
         row.className = 'slot' + (win !== null ? (win === pid ? ' win' : ' lost') : '') + (s.prov ? ' prov' : '') + (s.tbd ? ' tbd' : '');
-        row.innerHTML = `<span class="slot-seed">${s.seed}</span><div class="slot-body"><div class="slot-name"></div><div class="slot-sub">${s.sub}</div></div><span class="slot-score">${win !== null ? (win === pid ? '1' : '0') : ''}</span>`;
+        row.innerHTML = `<span class="slot-seed">${s.seed}</span><div class="slot-body"><div class="slot-name"></div><div class="slot-sub">${s.sub}</div></div><span class="slot-score">${g && g.played ? half(g.score[i]) : ''}</span>`;
         row.querySelector('.slot-name').textContent = s.name;
         el.appendChild(row);
       });
@@ -371,8 +376,8 @@
     const c1 = document.createElement('div'); c1.className = 'conn1'; c1.setAttribute('aria-hidden', 'true');
     const c2 = document.createElement('div'); c2.className = 'conn2'; c2.setAttribute('aria-hidden', 'true');
     wrap.append(c1, c2);
-    const champ = winnerOf(fin), bronze = winnerOf(thd);
-    const runner = champ ? (fin.p1 === champ ? fin.p2 : fin.p1) : null;
+    const champ = fin ? fin.winner : null, bronze = thd ? thd.winner : null;
+    const runner = champ ? (fin.a === champ ? fin.b : fin.a) : null;
     const card = document.createElement('div'); card.className = 'champ';
     card.innerHTML = `<div class="champ-piece">♔</div><div class="champ-k">Champion</div><div class="champ-name${champ ? '' : ' tbd'}"></div><div class="champ-sub"></div>`;
     card.querySelector('.champ-name').textContent = champ ? name(champ) : 'To be decided';

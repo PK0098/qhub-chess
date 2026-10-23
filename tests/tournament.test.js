@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   splitGroups, groupPairings, groupTable, semiPairings, finalPairings, winnerOf, toP1Result, validateRegistration,
+  seriesLegs, seriesOf, deciderLeg,
 } from '../functions/_lib/tournament.js';
 
 const conf = (p1, p2, result, round = 1, slot = 0, at = '2026-10-01') => ({ round, slot, p1, p2, result, status: 'confirmed', confirmed_at: at });
@@ -79,13 +80,52 @@ test('semiPairings crosses P1-A2 and A1-P2', () => {
   ]);
 });
 
-test('finalPairings waits for both semis, then pairs winners and losers', () => {
-  const semis = [conf(11, 22, '1-0', 2, 0), { ...conf(21, 12, '0-1', 2, 1), status: 'reported' }];
-  assert.equal(finalPairings(semis), null);
-  semis[1].status = 'confirmed';
-  assert.deepEqual(finalPairings(semis), [
-    { round: 3, slot: 0, p1: 11, p2: 12 },
-    { round: 3, slot: 1, p1: 22, p2: 21 },
+// A knockout series: games 1 and 2 swap colours, so each player gets White once.
+let gid = 0;
+const leg = (p1, p2, result, round = 2, slot = 0, status = 'confirmed') => ({ id: ++gid, round, slot, p1, p2, result, status });
+
+test('seriesLegs gives each player White once (p1 = White)', () => {
+  assert.deepEqual(seriesLegs(2, 1, 21, 12), [{ round: 2, slot: 1, p1: 21, p2: 12 }, { round: 2, slot: 1, p1: 12, p2: 21 }]);
+});
+
+test('seriesOf: 2-0 and 1½-½ are decided after two games, no game 3', () => {
+  const s = seriesOf([leg(11, 22, '1-0'), leg(22, 11, '0-1')], 2, 0);
+  assert.deepEqual([s.winner, s.loser, s.score, s.needDecider], [11, 22, [2, 0], false]);
+  const d = seriesOf([leg(11, 22, '1/2'), leg(22, 11, '1-0')], 2, 0);
+  assert.deepEqual([d.winner, d.score], [22, [0.5, 1.5]], 'a draw is half a point, so one win plus a draw goes through');
+});
+
+// Busy people: never more than 3 games, and game 1 alone never decides.
+test('seriesOf: one game in is never decided, even a win', () => {
+  const s = seriesOf([leg(11, 22, '1-0'), leg(22, 11, null, 2, 0, 'pending')], 2, 0);
+  assert.equal(s.winner, null);
+  assert.equal(s.needDecider, false);
+});
+
+test('seriesOf: 1-1 or two draws needs an Armageddon; a drawn Armageddon goes to Black', () => {
+  const tied = [leg(11, 22, '1/2'), leg(22, 11, '1/2')];
+  assert.equal(seriesOf(tied, 2, 0).needDecider, true);
+  assert.equal(seriesOf(tied, 2, 0).winner, null);
+  // Game 3 with 11 as Black (p2): a draw means 11 advances.
+  const s = seriesOf([...tied, leg(22, 11, '1/2')], 2, 0);
+  assert.deepEqual([s.winner, s.loser, s.score], [11, 22, [2, 1]]);
+  const w = seriesOf([leg(11, 22, '1-0'), leg(22, 11, '1-0'), leg(22, 11, '1-0')], 2, 0);
+  assert.equal(w.winner, 22, 'White winning the Armageddon advances');
+});
+
+test('deciderLeg uses the coin for colours', () => {
+  const s = { round: 2, slot: 0, a: 11, b: 22 };
+  assert.deepEqual(deciderLeg(s, () => 0.1), { round: 2, slot: 0, p1: 11, p2: 22 });
+  assert.deepEqual(deciderLeg(s, () => 0.9), { round: 2, slot: 0, p1: 22, p2: 11 });
+});
+
+test('finalPairings waits for both semi series, then pairs winners and losers', () => {
+  const games = [leg(11, 22, '1-0', 2, 0), leg(22, 11, '0-1', 2, 0), leg(21, 12, '0-1', 2, 1), leg(12, 21, '1/2', 2, 1, 'reported')];
+  assert.equal(finalPairings(games), null);
+  games[3].status = 'confirmed';
+  assert.deepEqual(finalPairings(games), [
+    { round: 3, slot: 0, p1: 11, p2: 12 }, { round: 3, slot: 0, p1: 12, p2: 11 },
+    { round: 3, slot: 1, p1: 22, p2: 21 }, { round: 3, slot: 1, p1: 21, p2: 22 },
   ]);
 });
 
