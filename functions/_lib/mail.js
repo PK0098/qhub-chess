@@ -274,7 +274,7 @@ Your page: ${url}`,
           <div style="margin-top:6px">Your opponent: ${opponentLine(opp)}. You have <strong>${mine.a === player.id ? 'White' : 'Black'}</strong> in game 1. A separate email with your report links is in your inbox too.</div></div>`
       : `<div style="border:2px solid #1c1a17;background:#efe6d2;padding:12px 14px;margin:0 0 16px">
           <div style="font-family:'Space Grotesk',Arial,sans-serif;font-weight:700;font-size:15px">Your tournament run ends here, ${esc(first(player.name))}.</div>
-          <div style="margin-top:6px">But the fun doesn't. Cheer for your favourite, watch the bracket, and practise your best "I would have played Nf5 there" face.</div></div>`;
+          <div style="margin-top:6px">But the fun doesn't. Cheer for your favourite, watch the bracket, and start your secret training for next season.</div></div>`;
     return {
       subject: `Group stage: game over. Meet the final four ♞`,
       html: layout(`The groups are done. Four players remain.`, `
