@@ -365,8 +365,14 @@
     const sf1 = find(2, 0), sf2 = find(2, 1), fin = find(3, 0), thd = find(3, 1);
     const sf1Pair = sf1 ? [fromGame(sf1, 0, 'P1', `Winner, ${GROUPS.P.full}`), fromGame(sf1, 1, 'A2', `Runner-up, ${GROUPS.A.full}`)] : [seedSlot('P', 1), seedSlot('A', 2)];
     const sf2Pair = sf2 ? [fromGame(sf2, 0, 'A1', `Winner, ${GROUPS.A.full}`), fromGame(sf2, 1, 'P2', `Runner-up, ${GROUPS.P.full}`)] : [seedSlot('A', 1), seedSlot('P', 2)];
-    const finPair = [fromGame(fin, 0, 'W1', 'Winner SF1'), fromGame(fin, 1, 'W2', 'Winner SF2')];
-    const thdPair = [fromGame(thd, 0, 'L1', 'Loser SF1'), fromGame(thd, 1, 'L2', 'Loser SF2')];
+    // Before the final/3rd-place series exist, fill a slot from a decided semifinal.
+    const fromSf = (sf, winner, seed, label) => {
+      if (!sf || sf.winner === null) return { seed, name: 'TBD', sub: label, tbd: true };
+      const loser = sf.a === sf.winner ? sf.b : sf.a;
+      return { seed, name: name(winner ? sf.winner : loser), sub: label };
+    };
+    const finPair = [fin ? fromGame(fin, 0, 'W1', 'Winner SF1') : fromSf(sf1, true, 'W1', 'Winner SF1'), fin ? fromGame(fin, 1, 'W2', 'Winner SF2') : fromSf(sf2, true, 'W2', 'Winner SF2')];
+    const thdPair = [thd ? fromGame(thd, 0, 'L1', 'Loser SF1') : fromSf(sf1, false, 'L1', 'Loser SF1'), thd ? fromGame(thd, 1, 'L2', 'Loser SF2') : fromSf(sf2, false, 'L2', 'Loser SF2')];
     wrap.append(
       mk('m-sf1', 'SF1 · Semifinal', sf1, sf1Pair),
       mk('m-sf2', 'SF2 · Semifinal', sf2, sf2Pair),
