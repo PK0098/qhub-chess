@@ -58,7 +58,7 @@
     <!-- PICK DAYS -->
     <section style="display: flex; flex-direction: column; gap: 14px;">
       <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1;">Which evenings work for you, Sona?</h2>
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1;">Which evenings work for you, Sona? Tick all that do.</h2>
         <div style="font-size: 12px; color: #5c5548; white-space: nowrap;">{{ pickedLabel }}</div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -83,7 +83,6 @@
           </button>
         </sc-for>
       </div>
-      <sc-if value="{{ tooMany }}" hint-placeholder-val="{{ false }}"><div style="padding: 8px 10px; background: #e0552b; border: 1.5px solid #1c1a17; font-size: 12.5px;">Two evenings max. Untick one to pick another.</div></sc-if>
       <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
         <button type="button" onClick="{{ save }}" disabled="{{ saveDisabled }}" style="flex: 1 1 160px; min-height: 48px; padding: 12px 24px; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 2px solid #1c1a17; {{ saveStyle }}">{{ saveLabel }}</button>
         <div style="flex: 1 1 200px; font-size: 12px; color: #5c5548; line-height: 1.5;">{{ saveHint }}</div>
@@ -155,7 +154,7 @@ class Component extends DCLogic {
       '2026-11-12': [1, 2, 4, 5, 3, 6, 7, 12],
       '2026-11-13': [4, 9],
     };
-    this.state = { votes, saved: ['2026-11-10'], picked: ['2026-11-10'], tooMany: false, mode: 'everyone', saving: false };
+    this.state = { votes, saved: ['2026-11-10'], picked: ['2026-11-10'], mode: 'everyone', saving: false };
   }
 
   initials(name) { return name.trim().split(/\s+/).map((s) => s[0]).join('').slice(0, 2).toUpperCase(); }
@@ -163,7 +162,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const closed = this.props.closed ?? false;
-    const { votes, picked, saved, tooMany, mode, saving } = this.state;
+    const { votes, picked, saved, mode, saving } = this.state;
     const byId = new Map(this.players.map((p) => [p.id, p]));
     const finalists = this.players.filter((p) => p.finalist).map((p) => p.id);
     const sameAsSaved = picked.length === saved.length && picked.every((d) => saved.includes(d));
@@ -188,9 +187,8 @@ class Component extends DCLogic {
           : (selected ? 'background: #1c1a17; color: #efe6d2; box-shadow: 6px 6px 0 #e0552b; transform: translate(-1px, -1px);' : 'background: #faf6ec; color: #1c1a17; box-shadow: 4px 4px 0 #1c1a17;'),
         toggle: () => {
           if (closed) return;
-          if (selected) return this.setState({ picked: picked.filter((k) => k !== d.key), tooMany: false });
-          if (picked.length >= 2) return this.setState({ tooMany: true });
-          this.setState({ picked: [...picked, d.key], tooMany: false });
+          if (selected) return this.setState({ picked: picked.filter((k) => k !== d.key) });
+          this.setState({ picked: [...picked, d.key] });
         },
       };
     });
@@ -227,8 +225,8 @@ class Component extends DCLogic {
     };
 
     return {
-      days, tally, tooMany: tooMany && !closed, save,
-      pickedLabel: closed ? 'Poll closed' : picked.length + ' of 2 picked',
+      days, tally, save,
+      pickedLabel: closed ? 'Poll closed' : picked.length === 1 ? '1 evening picked' : picked.length + ' evenings picked',
       saveDisabled: closed || sameAsSaved || saving,
       saveLabel: saving ? 'Saving…' : closed ? 'Poll closed' : sameAsSaved && saved.length ? 'Saved ✓' : 'Save my evenings',
       saveStyle: closed || sameAsSaved || saving

@@ -6,7 +6,7 @@ Date: 2026-11-06. Owner: Pouya. Status: decisions taken in chat.
 
 Both semi-finals are played (one leg still waits for a confirm click). The Final and the 3rd-place match are to be played on **one evening in the week of Monday 9 to Friday 13 November**, as a small gathering: doors at 20:00, both matches first (about an hour), then a 1-minute bullet round robin for everyone who comes, extra boards for casual games, bring your own drinks and snacks.
 
-Every registered player gets an email with a personal link to a poll page where they tick **up to two** days that work for them. The chosen day must work for all four finalists; the other votes are preference. The tally is live on the page.
+Every registered player gets an email with a personal link to a poll page where they tick **every** day that works for them (changed from "up to two" on 2026-11-06). The chosen day must work for all four finalists; the other votes are preference. The tally is live on the page.
 
 ## Non-goals
 
@@ -16,7 +16,7 @@ Choosing the day automatically (Pouya reads the tally and announces). Time-of-da
 
 - **Finalists** = the four players in the round-2 (semi-final) games. Both winners play the Final, both losers the 3rd-place match, so the unconfirmed leg does not matter.
 - **Days**: `2026-11-09` to `2026-11-13`, fixed list in code.
-- **Vote**: a player saves a set of 0–2 days. Saving replaces their previous set. Any change is allowed until the poll closes.
+- **Vote**: a player saves any set of days, empty to all five. Saving replaces their previous set. Any change is allowed until the poll closes.
 - **Close**: `settings.poll_closes_at` (ISO). Default written by the migration: `2026-11-08T20:00:00+04:00` (Sunday 20:00 Yerevan). After it, POST returns 409 and the page is read-only.
 - **Visibility**: every voter's name is visible per day; finalists are marked. Never emails or tokens.
 - **Identity**: the player's existing `token` (same as the game page). No name picking.
@@ -53,7 +53,7 @@ INSERT OR IGNORE INTO settings (key, value) VALUES ('poll_closes_at', '2026-11-0
 ```
 `total` = number of distinct players who voted. Unknown token → 404 (same as `/api/me`).
 
-`POST /api/poll` body `{ t, days: [...] }`. Validates: known token, each day in the list, no duplicates, length ≤ 2. Closed → 409. Replaces the player's rows in one batch (delete + inserts). Returns the same payload as GET.
+`POST /api/poll` body `{ t, days: [...] }`. Validates: known token, each day in the list, no duplicates. Closed → 409. Replaces the player's rows in one batch (delete + inserts). Returns the same payload as GET.
 
 ## Page `web/poll.html` + `web/poll.js`
 
@@ -61,7 +61,7 @@ Not linked from anywhere, `noindex`, listed in `web/_headers` as no-cache. Reads
 
 Content, top to bottom:
 1. Title "Finals night." and a short description block of the evening (20:00, matches, bullet round robin, open boards, drinks and snacks).
-2. "Which evenings work for you, {first name}? Pick up to two." Five day cards (Mon 9 … Fri 13 Nov). Tapping toggles; a third pick is refused with an inline note. Each card shows its count and the initials of voters (avatar style from the site). A card where all four finalists voted carries a "Works for all finalists" badge.
+2. "Which evenings work for you, {first name}?" Five day cards (Mon 9 … Fri 13 Nov). Tapping toggles, any number. Each card shows its count and the initials of voters (avatar style from the site). A card where all four finalists voted carries a "Works for all finalists" badge.
 3. A Save button (disabled until the selection differs from the saved one), with the existing loading/error pattern from `game.js`. After the close time the cards are not tappable and the Save row is replaced by "The poll closed on Sunday 8 November."
 4. Live tally: a bar per day, width proportional to votes, with the voter names listed. A toggle "Everyone / Finalists only": in finalists mode the bars count only the four finalists and each day lists which finalists ticked it. Finalists are marked with ♛ in both modes.
 5. Footer line with the closing time.

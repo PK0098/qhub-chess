@@ -2,7 +2,6 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const token = new URLSearchParams(location.search).get('t');
-  const MAX = 2;
   const initials = (name) => (name || '').trim().split(/\s+/).filter(Boolean).map((s) => s[0]).join('').slice(0, 2).toUpperCase();
   const first = (name) => (name || '').trim().split(/\s+/)[0];
   const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -35,7 +34,7 @@
     $('m-final').innerHTML = decided ? vs(nm(data.semis[0].winner), nm(data.semis[1].winner))
       : data.semis.map((s) => `<span>Winner of</span> ${vs(nm(s.a), nm(s.b))}`).join('<br>');
     $('m-bronze').innerHTML = decided ? vs(nm(data.semis[0].loser), nm(data.semis[1].loser)) : '<span>The two semi-final losers</span>';
-    $('pick-title').textContent = `Which evenings work for you, ${first(data.player.name)}?`;
+    $('pick-title').textContent = `Which evenings work for you, ${first(data.player.name)}? Tick all that do.`;
     renderDays();
     renderTally();
     $('foot').textContent = `${data.total} of ${data.players.length} players have voted. ` + (data.closed ? 'Poll closed.' : 'Closes ' + closesText(data.closesAt) + '.');
@@ -52,7 +51,7 @@
   function renderDays() {
     const byId = new Map(data.players.map((p) => [p.id, p]));
     const sameAsSaved = picked.length === data.mine.length && picked.every((d) => data.mine.includes(d));
-    $('pick-count').textContent = data.closed ? 'Poll closed' : `${picked.length} of ${MAX} picked`;
+    $('pick-count').textContent = data.closed ? 'Poll closed' : picked.length === 1 ? '1 evening picked' : `${picked.length} evenings picked`;
     const list = $('days'); list.innerHTML = '';
     for (const key of data.days) {
       const ids = data.votes[key] || [];
@@ -70,9 +69,7 @@
       b.onclick = () => {
         if (data.closed) return;
         if (selected) picked = picked.filter((k) => k !== key);
-        else if (picked.length >= MAX) { $('too-many').hidden = false; return; }
         else picked = [...picked, key];
-        $('too-many').hidden = true;
         renderDays();
       };
       list.appendChild(b);

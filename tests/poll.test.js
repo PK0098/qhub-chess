@@ -12,12 +12,12 @@ test('finalistIds is the four players in the round-2 games, decided or not', () 
   assert.deepEqual(finalistIds(games).sort(), [1, 2, 3, 4]);
 });
 
-// Two picks keep the tally meaningful: a player who ticks every day says nothing.
-test('validateVote refuses a third pick, duplicates and unknown days', () => {
+// Any number of evenings is fine (all five included); only the set itself is checked.
+test('validateVote accepts any number of known days, refuses duplicates and unknown days', () => {
   const ok = ['2026-11-09', '2026-11-13'];
   assert.deepEqual(validateVote(ok), ok);
   assert.deepEqual(validateVote([]), []);
-  assert.throws(() => validateVote(['2026-11-09', '2026-11-10', '2026-11-11']), /at most 2/);
+  assert.deepEqual(validateVote(['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13']).length, 5);
   assert.throws(() => validateVote(['2026-11-09', '2026-11-09']), /twice/);
   assert.throws(() => validateVote(['2026-11-14']), /Unknown day/);
   assert.throws(() => validateVote('2026-11-09'), /list/);

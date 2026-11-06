@@ -308,7 +308,7 @@ Your page: ${url}`,
     };
   },
 
-  // Finals night poll: everyone picks up to two evenings; the four finalists decide.
+  // Finals night poll: everyone ticks the evenings they can make; the four finalists decide.
   finalsPoll(env, { player, finalists, final, bronze, closesText }) {
     const url = `${env.SITE_URL}/poll?t=${encodeURIComponent(player.token)}`;
     const isFinalist = finalists.some((p) => p.id === player.id);
@@ -329,7 +329,7 @@ Your page: ${url}`,
         ${isFinalist
           ? `<div style="border:2px solid #1c1a17;background:#e4f1e4;padding:12px 14px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17"><strong>&#9819; You're playing that night, ${esc(first(player.name))}.</strong> The evening has to work for all four finalists, so your vote decides. Please answer today if you can.</div>`
           : `<p>Everyone from the tournament is welcome, playing or watching. Pick the evenings you can make it and we'll go with the one that works for all four finalists and the most of you.</p>`}
-        <p>Tick <strong>up to two evenings</strong> on your personal poll page. The tally is live, you can change your mind until it closes.</p>
+        <p>Tick <strong>every evening you can make</strong> on your personal poll page. More ticks, more chance we land on a night that suits you. The tally is live, you can change your mind until it closes.</p>
         ${button(url, 'Pick your evenings')}
         <p><strong>The poll closes ${esc(closesText)}.</strong> The evening is announced right after.</p>
         <p>See you at the board.</p>`),
@@ -337,7 +337,7 @@ Your page: ${url}`,
 Final: ${final.a} vs ${final.b}
 Bronze match: ${bronze.a} vs ${bronze.b}
 20:00 doors open at Q hub. Final and bronze match first (about an hour), then a 1-minute bullet round robin for everyone, extra boards for friendly games, bring your own drinks and snacks. Everyone is welcome, playing or watching.
-${isFinalist ? 'You are playing that night: the evening has to work for all four finalists, so please answer today.\n' : ''}Pick up to two evenings: ${url}
+${isFinalist ? 'You are playing that night: the evening has to work for all four finalists, so please answer today.\n' : ''}Tick every evening you can make: ${url}
 The poll closes ${closesText}.`,
     };
   },
