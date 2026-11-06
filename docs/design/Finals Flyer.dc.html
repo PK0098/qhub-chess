@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finals night flyer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+  <script src="./doc-page.js"></script>
+  <style>
+    doc-page:not(:defined) { visibility: hidden; }
+    body { margin: 0; font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #111111; -webkit-font-smoothing: antialiased; }
+    a { color: #111111; text-decoration: none; }
+    a:hover { color: #555555; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  </style>
+</helmet>
+
+<doc-page size="a4">
+  <section class="page" id="finals-flyer" data-screen-label="Finals night flyer A4" style="position: relative; overflow: hidden; background: #ffffff; color: #111111; font-family: 'IBM Plex Mono', ui-monospace, monospace; display: flex; flex-direction: column;">
+    <div aria-hidden="true" style="position: absolute; top: 12px; left: 12px; right: 12px; bottom: 13px; border: 3px solid #111111; pointer-events: none; z-index: 5;"></div>
+
+    <!-- HEADER -->
+    <div style="position: relative; padding: 15mm calc(14mm - 12px) 7mm; margin: 0 12px; border-bottom: 3px solid #111111;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 8pt; letter-spacing: 0.12em; text-transform: uppercase;">
+        <span>Q Hub · Yerevan · Autumn 2026</span>
+        <span style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 8px; border: 1.5px solid #111111; white-space: nowrap; flex-shrink: 0;"><span style="width: 7px; height: 7px; background: #111111; display: inline-block;"></span>Everyone welcome</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-top: 7mm;">
+        <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 76pt; line-height: 0.86; letter-spacing: -0.05em;">Finals<br><span style="color: transparent; -webkit-text-stroke: 1.6pt #111111;">night.</span></h1>
+        <div aria-hidden="true" style="font-size: 104pt; line-height: 0.85;">♔</div>
+      </div>
+      <div style="margin-top: 6mm; display: flex; align-items: baseline; gap: 4mm; flex-wrap: wrap;">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26pt; letter-spacing: -0.04em; line-height: 1;">{{ dayLabel }}</span>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26pt; letter-spacing: -0.04em; line-height: 1;">· 20:00</span>
+        <span style="font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #333333;">Q Hub, the big table</span>
+      </div>
+      <p style="margin: 3mm 0 0; font-size: 10pt; line-height: 1.5; color: #333333; max-width: 56ch; text-wrap: pretty;">Two matches decide the champion and the bronze. Then the boards come out for everyone. Bring your own drinks and snacks.</p>
+    </div>
+
+    <!-- BODY -->
+    <div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 6mm; padding: 7mm 14mm 5mm;">
+
+      <!-- THE MATCHES -->
+      <div>
+        <div style="font-weight: 600; font-size: 8pt; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3mm;">§ On the board</div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5mm;">
+          <div style="border: 2px solid #111111; padding: 3.5mm 4mm; box-shadow: 4px 4px 0 #111111; display: flex; flex-direction: column; gap: 2mm;">
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">The final</span><span aria-hidden="true" style="font-size: 16pt; line-height: 1;">♔</span></div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14pt; letter-spacing: -0.03em; line-height: 1.1;">{{ finalA }}<br><span style="font-weight: 500; font-size: 10pt; color: #555555;">vs</span><br>{{ finalB }}</div>
+          </div>
+          <div style="border: 1.5px dashed #111111; padding: 3.5mm 4mm; display: flex; flex-direction: column; gap: 2mm;">
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">Bronze match</span><span aria-hidden="true" style="font-size: 16pt; line-height: 1;">♗</span></div>
+            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14pt; letter-spacing: -0.03em; line-height: 1.1;">{{ bronzeA }}<br><span style="font-weight: 500; font-size: 10pt; color: #555555;">vs</span><br>{{ bronzeB }}</div>
+          </div>
+        </div>
+        <div style="margin-top: 3mm; font-size: 7.5pt; line-height: 1.45; color: #333333; text-wrap: pretty;">Both best of 3, ten minutes each. At 1–1 an Armageddon game decides: a draw sends Black through. Spectators welcome, commentary optional, silence during the clock.</div>
+      </div>
+
+      <!-- THE EVENING -->
+      <div>
+        <div style="font-weight: 600; font-size: 8pt; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3mm;">§ The evening</div>
+        <ol style="list-style: none; margin: 0; padding: 0; border: 2px solid #111111; background: #ffffff;">
+          <li style="display: grid; grid-template-columns: 16mm 1fr 8mm; gap: 3mm; align-items: start; padding: 2.8mm 3.5mm; border-bottom: 1px solid #111111;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12pt; letter-spacing: -0.03em; line-height: 1.1;">20:00</span><div><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11pt; letter-spacing: -0.02em; line-height: 1.1;">Doors</div><div style="font-size: 8pt; line-height: 1.45; color: #333333; margin-top: 1mm;">Grab a seat with a view of the two boards. Unpack what you brought.</div></div><span aria-hidden="true" style="font-size: 14pt; line-height: 1; text-align: right;">♟</span></li>
+          <li style="display: grid; grid-template-columns: 16mm 1fr 8mm; gap: 3mm; align-items: start; padding: 2.8mm 3.5mm; border-bottom: 1px solid #111111;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12pt; letter-spacing: -0.03em; line-height: 1.1;">20:15</span><div><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11pt; letter-spacing: -0.02em; line-height: 1.1;">Final and bronze match, side by side</div><div style="font-size: 8pt; line-height: 1.45; color: #333333; margin-top: 1mm;">About an hour. Clocks run, phones on silent, applause between games.</div></div><span aria-hidden="true" style="font-size: 14pt; line-height: 1; text-align: right;">♔</span></li>
+          <li style="display: grid; grid-template-columns: 16mm 1fr 8mm; gap: 3mm; align-items: start; padding: 2.8mm 3.5mm; border-bottom: 1px solid #111111;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12pt; letter-spacing: -0.03em; line-height: 1.1;">21:15</span><div><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11pt; letter-spacing: -0.02em; line-height: 1.1;">Bullet round robin: 1 minute each</div><div style="font-size: 8pt; line-height: 1.45; color: #333333; margin-top: 1mm;">Everyone plays everyone. No thinking allowed. Flag falls, game over.</div></div><span aria-hidden="true" style="font-size: 14pt; line-height: 1; text-align: right;">♞</span></li>
+          <li style="display: grid; grid-template-columns: 16mm 1fr 8mm; gap: 3mm; align-items: start; padding: 2.8mm 3.5mm;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12pt; letter-spacing: -0.03em; line-height: 1.1;">Late</span><div><div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11pt; letter-spacing: -0.02em; line-height: 1.1;">Open boards</div><div style="font-size: 8pt; line-height: 1.45; color: #333333; margin-top: 1mm;">Extra sets on every table. Friendly games, rematches, grudge matches. Stay as long as you like.</div></div><span aria-hidden="true" style="font-size: 14pt; line-height: 1; text-align: right;">♜</span></li>
+        </ol>
+      </div>
+
+      <!-- BRING + QR -->
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 62mm; gap: 6mm; align-items: stretch;">
+        <div style="border: 2px solid #111111; padding: 3.5mm 4mm; display: flex; flex-direction: column; justify-content: center; gap: 2mm;">
+          <div style="font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">Bring</div>
+          <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14pt; letter-spacing: -0.03em; line-height: 1.1;">Your own drinks and snacks.</div>
+          <div style="font-size: 8pt; line-height: 1.45; color: #333333; text-wrap: pretty;">Sharing earns goodwill and possibly a draw offer. A chess set, if you have one, earns a table.</div>
+        </div>
+        <a href="https://qhub-chess.pages.dev/" style="display: grid; grid-template-columns: 26mm minmax(0, 1fr); gap: 3.5mm; align-items: center; border: 2px solid #111111; box-shadow: 4px 4px 0 #111111; padding: 3.5mm; color: #111111;">
+          <span style="display: block; width: 26mm; height: 26mm; border: 1.5px solid #111111; padding: 1.5mm;"><img src="assets/qr-home.svg" alt="QR code linking to qhub-chess.pages.dev" style="display: block; width: 100%; height: 100%;"></span>
+          <span style="display: flex; flex-direction: column; gap: 2mm; min-width: 0;">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12pt; letter-spacing: -0.03em; line-height: 1.05;">Bracket &amp; live results</span>
+            <span style="font-size: 7pt; color: #555555; overflow-wrap: anywhere;">qhub-chess.pages.dev</span>
+          </span>
+        </a>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 7.5pt; color: #555555;">
+        <span>Q Hub Friendly Chess Tournament · the last evening</span>
+        <span style="font-style: italic;">One champion. Bragging rights for a year.</span>
+      </div>
+    </div>
+
+    <div aria-hidden="true" style="flex: 0 0 auto; height: 14px; background: repeating-conic-gradient(#111111 0 25%, #ffffff 0 50%) 0 0 / 28px 28px; border-top: 2px solid #111111; margin: 0 12px 13px;"></div>
+  </section>
+</doc-page>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"day":{"editor":"enum","options":["To be announced","Monday 9 November","Tuesday 10 November","Wednesday 11 November","Thursday 12 November","Friday 13 November"],"default":"To be announced","tsType":"string","section":"Event"},"finalA":{"editor":"text","default":"Winner of Nareg vs Samvel","tsType":"string","section":"Matches"},"finalB":{"editor":"text","default":"Winner of Tigran vs Arkadi","tsType":"string","section":"Matches"},"bronzeA":{"editor":"text","default":"Runner-up SF1","tsType":"string","section":"Matches"},"bronzeB":{"editor":"text","default":"Runner-up SF2","tsType":"string","section":"Matches"}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    const t0 = performance.now();
+    const tick = () => {
+      const d = document.querySelector('doc-page');
+      const sec = document.getElementById('finals-flyer');
+      if (sec && !sec.classList.contains('page')) sec.classList.add('page');
+      if (sec && d && sec.parentElement !== d) d.appendChild(sec);
+      const sheet = d && d.shadowRoot && d.shadowRoot.querySelector('.sheet');
+      if (d && sec && d._measure) d._measure();
+      if (sheet && sheet.classList.contains('paginated')) return;
+      if (performance.now() - t0 < 4000) requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  renderVals() {
+    return {
+      dayLabel: this.props.day ?? 'To be announced',
+      finalA: this.props.finalA ?? 'Winner of Nareg vs Samvel',
+      finalB: this.props.finalB ?? 'Winner of Tigran vs Arkadi',
+      bronzeA: this.props.bronzeA ?? 'Runner-up SF1',
+      bronzeB: this.props.bronzeB ?? 'Runner-up SF2',
+    };
+  }
+}
+</script>
+</body>
+</html>
