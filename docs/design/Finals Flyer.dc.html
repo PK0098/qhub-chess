@@ -99,7 +99,7 @@
   </section>
 </doc-page>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"day":{"editor":"enum","options":["To be announced","Monday 9 November","Tuesday 10 November","Wednesday 11 November","Thursday 12 November","Friday 13 November"],"default":"To be announced","tsType":"string","section":"Event"},"finalA":{"editor":"text","default":"Winner of Nareg vs Samvel","tsType":"string","section":"Matches"},"finalB":{"editor":"text","default":"Winner of Tigran vs Arkadi","tsType":"string","section":"Matches"},"bronzeA":{"editor":"text","default":"Runner-up SF1","tsType":"string","section":"Matches"},"bronzeB":{"editor":"text","default":"Runner-up SF2","tsType":"string","section":"Matches"}}'>
+<script type="text/x-dc" data-dc-script data-props='{"day":{"editor":"enum","options":["To be announced","Monday 9 November","Tuesday 10 November","Wednesday 11 November","Thursday 12 November","Friday 13 November"],"default":"To be announced","tsType":"string","section":"Event"},"finalA":{"editor":"text","default":"Nareg","tsType":"string","section":"Matches"},"finalB":{"editor":"text","default":"Tigran","tsType":"string","section":"Matches"},"bronzeA":{"editor":"text","default":"Samvel Gharibyan","tsType":"string","section":"Matches"},"bronzeB":{"editor":"text","default":"Arkadi","tsType":"string","section":"Matches"}}'>
 class Component extends DCLogic {
   componentDidMount() {
     const t0 = performance.now();
@@ -118,10 +118,10 @@ class Component extends DCLogic {
   renderVals() {
     return {
       dayLabel: this.props.day ?? 'To be announced',
-      finalA: this.props.finalA ?? 'Winner of Nareg vs Samvel',
-      finalB: this.props.finalB ?? 'Winner of Tigran vs Arkadi',
-      bronzeA: this.props.bronzeA ?? 'Runner-up SF1',
-      bronzeB: this.props.bronzeB ?? 'Runner-up SF2',
+      finalA: this.props.finalA ?? 'Nareg',
+      finalB: this.props.finalB ?? 'Tigran',
+      bronzeA: this.props.bronzeA ?? 'Samvel Gharibyan',
+      bronzeB: this.props.bronzeB ?? 'Arkadi',
     };
   }
 }

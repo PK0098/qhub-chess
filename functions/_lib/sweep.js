@@ -31,7 +31,15 @@ export async function advanceGroups(db, env) {
   const round = (r) => games.filter((g) => g.round === r);
   // 'closed' = left unplayed when the organizer ended the group stage.
   const groupOver = (list) => list.length > 0 && list.every((g) => g.status === 'confirmed' || g.status === 'closed');
-  const ins = db.prepare('INSERT INTO games (round, slot, p1, p2, status) VALUES (?, ?, ?, ?, ?)');
+  // Every request runs a sweep, so two can overlap and both see a stage as
+  // missing. Each insert only lands while its round holds exactly the number
+  // of games this sweep counted, so the second sweep inserts nothing and
+  // sends no emails (the final was created twice on 2026-11-06 this way).
+  const insAt = db.prepare('INSERT INTO games (round, slot, p1, p2, status) SELECT ?, ?, ?, ?, ? WHERE (SELECT COUNT(*) FROM games WHERE round = ?) = ?');
+  const insertLegs = async (legs, r, existing) => {
+    const rs = await db.batch(legs.map((g, i) => insAt.bind(g.round, g.slot, g.p1, g.p2, 'pending', r, existing + i)));
+    return rs.reduce((n, x) => n + (x.meta.changes || 0), 0) === legs.length;
+  };
   const firstLegs = (list) => list.filter((g, i, all) => all.findIndex((x) => x.slot === g.slot) === i);
 
   // 1. Group stage over → semi series (games 1 and 2 of each).
@@ -39,7 +47,7 @@ export async function advanceGroups(db, env) {
     if (!groupOver(round(1))) return { advanced: [] };
     const tables = await groupTables(db, players, games);
     const legs = semiPairings(tables.P, tables.A).flatMap((s) => seriesLegs(s.round, s.slot, s.p1, s.p2));
-    await db.batch(legs.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
+    if (!(await insertLegs(legs, 2, 0))) return { advanced: [] };
     const created = (await listGames(db)).filter((g) => g.round === 2);
     await emailPairings(db, env, firstLegs(created), 'semi');
     return { advanced: created };
@@ -49,7 +57,8 @@ export async function advanceGroups(db, env) {
   const series = [[2, 0], [2, 1], [3, 0], [3, 1]].map(([r, s]) => seriesOf(games, r, s)).filter(Boolean);
   const deciders = series.filter((s) => s.needDecider && s.legs.length === 2).map((s) => deciderLeg(s));
   if (deciders.length) {
-    await db.batch(deciders.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
+    // Deciders due at the same time are always in the same round.
+    if (!(await insertLegs(deciders, deciders[0].round, round(deciders[0].round).length))) return { advanced: [] };
     const all = await listGames(db);
     const created = deciders.map((d) => all.filter((g) => g.round === d.round && g.slot === d.slot).pop());
     await emailPairings(db, env, created, 'decider');
@@ -60,7 +69,7 @@ export async function advanceGroups(db, env) {
   if (round(3).length === 0) {
     const next = finalPairings(games);
     if (!next) return { advanced: [] };
-    await db.batch(next.map((g) => ins.bind(g.round, g.slot, g.p1, g.p2, 'pending')));
+    if (!(await insertLegs(next, 3, 0))) return { advanced: [] };
     const created = firstLegs((await listGames(db)).filter((g) => g.round === 3));
     await emailPairings(db, env, created.filter((g) => g.slot === 0), 'final');
     await emailPairings(db, env, created.filter((g) => g.slot === 1), 'third');
