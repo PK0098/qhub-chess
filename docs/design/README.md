@@ -19,6 +19,7 @@ The shipped site lives in `web/` and may have diverged from these mocks.
 | Print | `Chess Tournament Flyer-print.dc.html` | 1790154161896784 | Print-frozen copy of the flyer |
 | Print | `Chess Set Tags.dc.html` | 1790773940435174 | Kitchen chess set tags, 4 per A4 |
 | Print | `Chess Set Tags-print.dc.html` | 1790774532570832 | Print-frozen copy of the set tags |
+| Finals night poll | `Finals Poll.dc.html` | 2026-11-06 | Player poll page with mock votes; `closed` tweak |
 | Homepage | `Pouya Homepage.dc.html` | 1790077617540839 | Personal landing page |
 | Runtime/support | `support.js` | 1789483330860107 | Runtime for `.dc.html` files |
 | Runtime/support | `doc-page.js` | 1790000742878769 | `<doc-page>` paged-document component for print files |

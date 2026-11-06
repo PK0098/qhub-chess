@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finals night · Q hub Chess</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1c1a17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css?v=202609231200">
+<style>
+  .page { max-width: 640px; margin: 0 auto; padding: 24px 16px 64px; display: flex; flex-direction: column; gap: 28px; }
+  section { display: flex; flex-direction: column; gap: 14px; }
+  h1.small { font-size: clamp(36px, 9vw, 52px); line-height: 0.95; }
+  h2.sec { font-size: 24px; letter-spacing: -0.03em; line-height: 1.1; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 10px; border: 1px solid var(--ink); font-weight: 600; }
+  .pill .blink { background: var(--orange); }
+  .intro { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); text-wrap: pretty; }
+  .matches { background: var(--ink); color: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--orange); padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px 24px; }
+  .m-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); font-weight: 600; margin-bottom: 4px; }
+  .m-label.bronze { color: var(--gold); }
+  .m-vs { font-family: var(--grot); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; line-height: 1.15; }
+  .m-vs span { color: rgba(239,230,210,0.55); font-weight: 500; }
+  .muted { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .days { display: flex; flex-direction: column; gap: 10px; }
+  .day { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 14px; width: 100%; min-height: 76px; padding: 12px 14px; text-align: left; font-family: inherit; cursor: pointer; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); transition: transform .12s ease, box-shadow .12s ease; }
+  .day[aria-pressed="true"] { background: var(--ink); color: var(--cream); box-shadow: 6px 6px 0 var(--orange); transform: translate(-1px, -1px); }
+  .day:disabled { cursor: default; box-shadow: none; opacity: .75; }
+  .day:disabled[aria-pressed="true"] { opacity: 1; box-shadow: 4px 4px 0 var(--orange); transform: none; }
+  .d-date { display: flex; flex-direction: column; line-height: 1; }
+  .d-dow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+  .day[aria-pressed="true"] .d-dow { color: var(--orange); }
+  .d-num { font-family: var(--grot); font-weight: 700; font-size: 34px; letter-spacing: -0.04em; margin-top: 2px; }
+  .d-mid { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .d-count { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+  .badge { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; padding: 3px 7px; background: var(--green); color: var(--ink); border: 1.5px solid var(--ink); }
+  .chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip { width: 26px; height: 26px; border-radius: 999px; display: inline-grid; place-items: center; font-size: 10px; font-weight: 600; background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); background-size: cover; background-position: center; }
+  .chip.fin { background-color: var(--orange); }
+  .day[aria-pressed="true"] .chip { background-color: transparent; color: var(--cream); border-color: rgba(239,230,210,0.6); }
+  .day[aria-pressed="true"] .chip.fin { background-color: var(--orange); color: var(--ink); border-color: var(--cream); }
+  .d-mark { width: 28px; height: 28px; border: 2px solid currentColor; display: grid; place-items: center; font-size: 16px; font-weight: 700; }
+  .note { padding: 8px 10px; background: var(--orange); border: 1.5px solid var(--ink); font-size: 12.5px; }
+  .save-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .save-row .btn { flex: 1 1 160px; justify-content: center; min-height: 48px; border: 2px solid var(--ink); background: var(--orange); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+  .save-row .btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+  .save-row .btn:disabled { background: transparent; color: var(--muted); border-color: var(--line); box-shadow: none; transform: none; cursor: default; }
+  .save-row .btn.loading::before { content: ''; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .save-row .muted { flex: 1 1 200px; }
+  .seg { display: inline-flex; border: 2px solid var(--ink); }
+  .seg button { min-height: 36px; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 0; background: var(--paper); color: var(--ink); font-family: inherit; cursor: pointer; }
+  .seg button + button { border-left: 2px solid var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--cream); }
+  .tally { display: flex; flex-direction: column; gap: 10px; }
+  .t-row { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: start; }
+  .t-label { font-size: 12px; font-weight: 600; padding-top: 6px; white-space: nowrap; }
+  .t-bar { position: relative; height: 30px; border: 2px solid var(--ink); background: var(--paper); }
+  .t-fill { position: absolute; inset: 0; background: var(--orange); transition: width .3s ease; }
+  .t-fill.all { background: var(--green); }
+  .t-fill.fin { background: var(--gold); }
+  .t-text { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 8px; gap: 8px; font-family: var(--grot); font-weight: 700; font-size: 15px; }
+  .t-text .badge { font-family: var(--mono); padding: 1px 6px; }
+  .t-names { font-size: 12px; line-height: 1.5; color: var(--ink-2); margin-top: 6px; text-wrap: pretty; }
+  .foot { border-top: 1px solid var(--ink); padding-top: 10px; }
+  .empty { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .err { padding: 8px 10px; background: var(--orange); border: 1.5px solid var(--ink); font-size: 12.5px; }
+</style>
+</head>
+<body data-phase="play">
+<header class="topbar">
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a href="/" class="brand"><span class="brand-mark"><span></span><span></span><span></span><span></span></span><span class="brand-name">QHUB_CHESS</span></a>
+      <div class="nav-links"><a href="/#bracket">Bracket</a><a href="/#players">Players</a></div>
+    </div>
+  </nav>
+</header>
+<main class="page">
+  <div id="empty" class="empty" hidden></div>
+  <div id="app" hidden style="display: contents">
+    <section>
+      <div class="pill"><span class="blink"></span><span id="pill-text">Poll</span></div>
+      <h1 class="small">Finals night<span class="accent">.</span></h1>
+      <p class="intro">One evening, week of 9 to 13 November. Doors at <strong>20:00</strong>. The <strong>Final</strong> and the <strong>bronze match</strong> are played first, about an hour. Then a <strong>1-minute bullet round robin</strong> for everyone who comes, and open boards for friendly games until late. Bring your own drinks and snacks.</p>
+      <div class="matches">
+        <div><div class="m-label">Final</div><div class="m-vs" id="m-final"></div></div>
+        <div><div class="m-label bronze">Bronze match</div><div class="m-vs" id="m-bronze"></div></div>
+      </div>
+    </section>
+    <section>
+      <div class="sec-head"><h2 class="sec" id="pick-title"></h2><div class="muted" id="pick-count"></div></div>
+      <div class="days" id="days"></div>
+      <div class="note" id="too-many" hidden>Two evenings max. Untick one to pick another.</div>
+      <div class="save-row"><button type="button" class="btn" id="save" disabled>Save my evenings</button><div class="muted" id="save-hint"></div></div>
+      <div class="err" id="err" hidden></div>
+    </section>
+    <section>
+      <div class="sec-head" style="align-items: center">
+        <h2 class="sec">Live tally</h2>
+        <div class="seg" role="group" aria-label="Show votes of"><button type="button" id="seg-all" aria-pressed="true">Everyone</button><button type="button" id="seg-fin" aria-pressed="false">♛ Finalists</button></div>
+      </div>
+      <div class="muted" id="tally-hint"></div>
+      <div class="tally" id="tally"></div>
+      <div class="muted foot" id="foot"></div>
+    </section>
+  </div>
+</main>
+<footer class="footer"><div class="wrap">Made by Pouya · Questions: <a href="mailto:chess@pouyakarimi.com">chess@pouyakarimi.com</a></div></footer>
+<script src="poll.js?v=202611061200"></script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "276e72eeb53a4ebba0d1cf6c32d940f6"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

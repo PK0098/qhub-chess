@@ -16,6 +16,26 @@ const groupStageRunning = async (db) => {
 };
 
 export const broadcasts = {
+  finalsPoll: {
+    label: 'Finals night: poll for the evening (9-13 Nov)',
+    async prepare(db, env, players) {
+      const games = await listGames(db);
+      const semis = [seriesOf(games, 2, 0), seriesOf(games, 2, 1)];
+      if (semis.some((s) => !s)) throw bad('The semi-finals have not been created yet', 409);
+      const byId = new Map(players.map((p) => [p.id, p]));
+      const nm = (id) => (byId.get(id) || {}).name || '?';
+      const decided = semis.every((s) => s.winner !== null);
+      const finalists = semis.flatMap((s) => [byId.get(s.a), byId.get(s.b)]).filter(Boolean);
+      const closesAt = await getSetting(db, 'poll_closes_at');
+      const closesText = closesAt ? new Date(closesAt).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Yerevan' }).replace(',', '').replace(/ (\d\d:\d\d)$/, ' at $1') : 'soon';
+      return {
+        finalists, closesText,
+        final: decided ? { a: nm(semis[0].winner), b: nm(semis[1].winner) } : { a: `Winner of ${nm(semis[0].a)} vs ${nm(semis[0].b)}`, b: `winner of ${nm(semis[1].a)} vs ${nm(semis[1].b)}` },
+        bronze: decided ? { a: nm(semis[0].loser), b: nm(semis[1].loser) } : { a: 'The other two semi-finalists', b: 'each other' },
+      };
+    },
+    build: (env, ctx, player) => templates.finalsPoll(env, { player, ...ctx }),
+  },
   groupsEnded: {
     label: 'Group stage over: who advanced + semi rules',
     async prepare(db, env, players) {

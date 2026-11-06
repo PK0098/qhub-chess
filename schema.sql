@@ -34,3 +34,11 @@ CREATE TABLE IF NOT EXISTS outbox (
   created_at TEXT NOT NULL
 );
 INSERT OR IGNORE INTO settings (key, value) VALUES ('phase', 'registration');
+-- Finals night poll: up to two evenings per player.
+CREATE TABLE IF NOT EXISTS poll_votes (
+  player_id INTEGER NOT NULL,
+  day TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (player_id, day)
+);
+INSERT OR IGNORE INTO settings (key, value) VALUES ('poll_closes_at', '2026-11-08T20:00:00+04:00');

@@ -6,3 +6,5 @@
   Cache-Control: no-cache
 /admin
   Cache-Control: no-cache
+/poll
+  Cache-Control: no-cache

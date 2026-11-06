@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finals night poll</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; background: #efe6d2; color: #1c1a17; font-family: 'IBM Plex Mono', ui-monospace, monospace; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    * { box-sizing: border-box; }
+    button { font-family: inherit; cursor: pointer; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+  </style>
+</helmet>
+
+<div data-screen-label="Finals night poll (player page)" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #1c1a17; background: #efe6d2; min-height: 100vh; overflow-x: clip;">
+
+  <!-- NAV (same as game page) -->
+  <nav style="position: sticky; top: 0; z-index: 20; background: #1c1a17; color: #efe6d2; border-bottom: 3px solid #e0552b;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <a href="#top" style="display: flex; align-items: center; gap: 10px; color: #efe6d2; flex-shrink: 0;">
+        <span style="display: grid; grid-template-columns: repeat(2, 10px); grid-template-rows: repeat(2, 10px);"><span style="background: #efe6d2;"></span><span style="background: #e0552b;"></span><span style="background: #e0552b;"></span><span style="background: #efe6d2;"></span></span>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em;">QHUB_CHESS</span>
+      </a>
+      <div style="display: flex; gap: 2px;">
+        <a href="#" style="padding: 8px 12px; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;">Bracket</a>
+        <a href="#" style="padding: 8px 12px; font-weight: 500; font-size: 13px; color: #efe6d2; white-space: nowrap; border-bottom: 2px solid transparent;" style-hover="color: #e0552b; border-bottom-color: #e0552b;">Players</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top" style="max-width: 640px; margin: 0 auto; padding: 24px 16px 64px; display: flex; flex-direction: column; gap: 28px;">
+
+    <!-- HEADLINE + EVENING -->
+    <section style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 10px; border: 1px solid #1c1a17; font-weight: 600;"><span style="width: 8px; height: 8px; background: #e0552b; display: inline-block; animation: blink 1.4s ease-in-out infinite;"></span>Poll closes Sun 8 Nov · 20:00</div>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(36px, 9vw, 52px); line-height: 0.95; letter-spacing: -0.04em;">Finals night<span style="color: #e0552b;">.</span></h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3d3831; text-wrap: pretty;">One evening, week of 9 to 13 November. Doors at <strong>20:00</strong>. The <strong>Final</strong> and the <strong>bronze match</strong> are played first, about an hour. Then a <strong>1-minute bullet round robin</strong> for everyone who comes, and open boards for friendly games until late. Bring your own drinks and snacks.</p>
+      <div style="background: #1c1a17; color: #efe6d2; border: 2px solid #1c1a17; box-shadow: 6px 6px 0 #e0552b; padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px 24px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #e0552b; font-weight: 600;">Final</div>
+          <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; line-height: 1.15;">Ani Petrosyan <span style="color: rgba(239,230,210,0.55); font-weight: 500;">vs</span> Tigran Grigoryan</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #d9a92f; font-weight: 600;">Bronze match</div>
+          <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; line-height: 1.15;">Davit Hakobyan <span style="color: rgba(239,230,210,0.55); font-weight: 500;">vs</span> Lilit Avetisyan</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PICK DAYS -->
+    <section style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1;">Which evenings work for you, Sona?</h2>
+        <div style="font-size: 12px; color: #5c5548; white-space: nowrap;">{{ pickedLabel }}</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ days }}" as="d" hint-placeholder-count="5">
+          <button type="button" onClick="{{ d.toggle }}" aria-pressed="{{ d.selected }}" style="display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 14px; width: 100%; min-height: 76px; padding: 12px 14px; text-align: left; border: 2px solid #1c1a17; {{ d.cardStyle }}">
+            <div style="display: flex; flex-direction: column; line-height: 1;">
+              <span style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; {{ d.dowStyle }}">{{ d.dow }}</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: -0.04em; margin-top: 2px;">{{ d.num }}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 13px; font-weight: 600;">{{ d.countLabel }}</span>
+                <sc-if value="{{ d.allFinalists }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; padding: 3px 7px; background: #7dc46a; color: #1c1a17; border: 1.5px solid #1c1a17;">♛ Works for all four</span></sc-if>
+              </div>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <sc-for list="{{ d.voters }}" as="v" hint-placeholder-count="4">
+                  <span title="{{ v.name }}" style="width: 26px; height: 26px; border-radius: 999px; display: inline-grid; place-items: center; font-size: 10px; font-weight: 600; letter-spacing: 0; {{ v.chipStyle }}">{{ v.initials }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <span aria-hidden="true" style="width: 28px; height: 28px; border: 2px solid currentColor; display: grid; place-items: center; font-size: 16px; font-weight: 700;">{{ d.mark }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ tooMany }}" hint-placeholder-val="{{ false }}"><div style="padding: 8px 10px; background: #e0552b; border: 1.5px solid #1c1a17; font-size: 12.5px;">Two evenings max. Untick one to pick another.</div></sc-if>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <button type="button" onClick="{{ save }}" disabled="{{ saveDisabled }}" style="flex: 1 1 160px; min-height: 48px; padding: 12px 24px; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 2px solid #1c1a17; {{ saveStyle }}">{{ saveLabel }}</button>
+        <div style="flex: 1 1 200px; font-size: 12px; color: #5c5548; line-height: 1.5;">{{ saveHint }}</div>
+      </div>
+    </section>
+
+    <!-- TALLY -->
+    <section style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.03em; line-height: 1.1;">Live tally</h2>
+        <div role="group" aria-label="Show votes of" style="display: inline-flex; border: 2px solid #1c1a17;">
+          <button type="button" onClick="{{ showEveryone }}" style="min-height: 36px; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 0; {{ everyoneStyle }}">Everyone</button>
+          <button type="button" onClick="{{ showFinalists }}" style="min-height: 36px; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 0; border-left: 2px solid #1c1a17; {{ finalistsStyle }}">♛ Finalists</button>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #5c5548; line-height: 1.5;">{{ tallyHint }}</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ tally }}" as="t" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: start;">
+            <div style="font-size: 12px; font-weight: 600; padding-top: 6px; white-space: nowrap;">{{ t.label }}</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+              <div style="position: relative; height: 30px; border: 2px solid #1c1a17; background: #faf6ec;">
+                <div style="position: absolute; inset: 0; width: {{ t.width }}; {{ t.barStyle }}"></div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; padding: 0 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; gap: 8px;"><span>{{ t.count }}</span><sc-if value="{{ t.allFinalists }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; font-weight: 600; background: #7dc46a; border: 1.5px solid #1c1a17; padding: 1px 6px;">all four</span></sc-if></div>
+              </div>
+              <div style="font-size: 12px; line-height: 1.5; color: #3d3831; text-wrap: pretty;">{{ t.names }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border-top: 1px solid #1c1a17; padding-top: 10px; font-size: 12px; color: #5c5548; line-height: 1.5;">{{ footerLine }}</div>
+    </section>
+  </main>
+
+  <footer style="background: #1c1a17; color: #efe6d2; padding: 18px 20px; font-size: 12px;"><div style="max-width: 1160px; margin: 0 auto;">Made by Pouya · Questions: <a href="mailto:chess@pouyakarimi.com" style="color: #e0552b;">chess@pouyakarimi.com</a></div></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"closed":{"editor":"boolean","default":false,"tsType":"boolean","section":"Poll"},"$preview":{"width":402,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // Mock data: the 12 seeded players; the four semi-finalists are the finalists.
+    this.players = [
+      { id: 1, name: 'Ani Petrosyan', finalist: true },
+      { id: 2, name: 'Davit Hakobyan', finalist: true },
+      { id: 3, name: 'Narek Sargsyan' },
+      { id: 4, name: 'Lilit Avetisyan', finalist: true },
+      { id: 5, name: 'Tigran Grigoryan', finalist: true },
+      { id: 6, name: 'Mariam Karapetyan' },
+      { id: 7, name: 'Hayk Mkrtchyan' },
+      { id: 8, name: 'Sona Harutyunyan' },
+      { id: 9, name: 'Aram Vardanyan' },
+      { id: 10, name: 'Anahit Hovhannisyan' },
+      { id: 11, name: 'Levon Galstyan' },
+      { id: 12, name: 'Nare Simonyan' },
+    ];
+    this.me = 8;
+    this.days = [
+      { key: '2026-11-09', dow: 'Mon', num: '9', label: 'Mon 9' },
+      { key: '2026-11-10', dow: 'Tue', num: '10', label: 'Tue 10' },
+      { key: '2026-11-11', dow: 'Wed', num: '11', label: 'Wed 11' },
+      { key: '2026-11-12', dow: 'Thu', num: '12', label: 'Thu 12' },
+      { key: '2026-11-13', dow: 'Fri', num: '13', label: 'Fri 13' },
+    ];
+    const votes = {
+      '2026-11-09': [1, 3, 7],
+      '2026-11-10': [1, 2, 4, 5, 6, 9, 10],
+      '2026-11-11': [2, 5, 11],
+      '2026-11-12': [1, 2, 4, 5, 3, 6, 7, 12],
+      '2026-11-13': [4, 9],
+    };
+    this.state = { votes, saved: ['2026-11-10'], picked: ['2026-11-10'], tooMany: false, mode: 'everyone', saving: false };
+  }
+
+  initials(name) { return name.trim().split(/\s+/).map((s) => s[0]).join('').slice(0, 2).toUpperCase(); }
+  first(name) { return name.trim().split(/\s+/)[0]; }
+
+  renderVals() {
+    const closed = this.props.closed ?? false;
+    const { votes, picked, saved, tooMany, mode, saving } = this.state;
+    const byId = new Map(this.players.map((p) => [p.id, p]));
+    const finalists = this.players.filter((p) => p.finalist).map((p) => p.id);
+    const sameAsSaved = picked.length === saved.length && picked.every((d) => saved.includes(d));
+
+    const days = this.days.map((d) => {
+      const ids = votes[d.key] || [];
+      const selected = picked.includes(d.key);
+      const allFinalists = finalists.every((id) => ids.includes(id));
+      const voters = ids.map((id) => byId.get(id)).sort((a, b) => (b.finalist ? 1 : 0) - (a.finalist ? 1 : 0)).map((p) => ({
+        name: p.name, initials: this.initials(p.name),
+        chipStyle: p.finalist
+          ? (selected ? 'background: #e0552b; color: #1c1a17; border: 1.5px solid #efe6d2;' : 'background: #e0552b; color: #1c1a17; border: 1.5px solid #1c1a17;')
+          : (selected ? 'background: transparent; color: #efe6d2; border: 1.5px solid rgba(239,230,210,0.6);' : 'background: #faf6ec; color: #1c1a17; border: 1.5px solid #1c1a17;'),
+      }));
+      return {
+        key: d.key, dow: d.dow, num: d.num, selected, allFinalists, voters,
+        countLabel: ids.length === 0 ? 'Nobody yet' : ids.length === 1 ? '1 can make it' : ids.length + ' can make it',
+        mark: selected ? '✓' : '',
+        dowStyle: selected ? 'color: #e0552b;' : 'color: #5c5548;',
+        cardStyle: closed
+          ? (selected ? 'background: #1c1a17; color: #efe6d2; box-shadow: 4px 4px 0 #e0552b; cursor: default;' : 'background: #faf6ec; color: #1c1a17; opacity: .75; cursor: default;')
+          : (selected ? 'background: #1c1a17; color: #efe6d2; box-shadow: 6px 6px 0 #e0552b; transform: translate(-1px, -1px);' : 'background: #faf6ec; color: #1c1a17; box-shadow: 4px 4px 0 #1c1a17;'),
+        toggle: () => {
+          if (closed) return;
+          if (selected) return this.setState({ picked: picked.filter((k) => k !== d.key), tooMany: false });
+          if (picked.length >= 2) return this.setState({ tooMany: true });
+          this.setState({ picked: [...picked, d.key], tooMany: false });
+        },
+      };
+    });
+
+    const onlyFinalists = mode === 'finalists';
+    const voterCount = new Set(Object.values(votes).flat()).size;
+    const max = Math.max(1, ...this.days.map((d) => (votes[d.key] || []).filter((id) => !onlyFinalists || finalists.includes(id)).length));
+    const tally = this.days.map((d) => {
+      const all = votes[d.key] || [];
+      const ids = all.filter((id) => !onlyFinalists || finalists.includes(id));
+      const allFinalists = finalists.every((id) => all.includes(id));
+      const ps = ids.map((id) => byId.get(id)).sort((a, b) => (b.finalist ? 1 : 0) - (a.finalist ? 1 : 0));
+      const missing = finalists.filter((id) => !all.includes(id)).map((id) => this.first(byId.get(id).name));
+      const names = ps.map((p) => (p.finalist ? '♛ ' : '') + p.name).join(', ');
+      return {
+        label: d.label, count: onlyFinalists ? ids.length + ' of 4' : String(ids.length), allFinalists,
+        width: Math.round((ids.length / max) * 100) + '%',
+        barStyle: allFinalists ? 'background: #7dc46a;' : onlyFinalists ? 'background: #d9a92f;' : 'background: #e0552b;',
+        names: onlyFinalists
+          ? (names || 'No finalist yet') + (missing.length && ids.length ? '. Missing: ' + missing.join(', ') : '')
+          : names || 'No votes yet',
+      };
+    });
+
+    const save = () => {
+      if (closed || sameAsSaved || saving) return;
+      this.setState({ saving: true });
+      setTimeout(() => {
+        const next = {};
+        for (const d of this.days) next[d.key] = (votes[d.key] || []).filter((id) => id !== this.me);
+        for (const k of picked) next[k] = [...next[k], this.me];
+        this.setState({ votes: next, saved: [...picked], saving: false });
+      }, 500);
+    };
+
+    return {
+      days, tally, tooMany: tooMany && !closed, save,
+      pickedLabel: closed ? 'Poll closed' : picked.length + ' of 2 picked',
+      saveDisabled: closed || sameAsSaved || saving,
+      saveLabel: saving ? 'Saving…' : closed ? 'Poll closed' : sameAsSaved && saved.length ? 'Saved ✓' : 'Save my evenings',
+      saveStyle: closed || sameAsSaved || saving
+        ? 'background: transparent; color: #5c5548; border-color: #c9c2b2; cursor: default;'
+        : 'background: #e0552b; color: #1c1a17; box-shadow: 4px 4px 0 #1c1a17;',
+      saveHint: closed ? 'The poll closed on Sunday 8 November. Pouya announces the evening by email.' : 'Change your mind any time until Sunday 8 November, 20:00.',
+      showEveryone: () => this.setState({ mode: 'everyone' }),
+      showFinalists: () => this.setState({ mode: 'finalists' }),
+      everyoneStyle: onlyFinalists ? 'background: #faf6ec; color: #1c1a17;' : 'background: #1c1a17; color: #efe6d2;',
+      finalistsStyle: onlyFinalists ? 'background: #1c1a17; color: #efe6d2;' : 'background: #faf6ec; color: #1c1a17;',
+      tallyHint: onlyFinalists ? 'Only the four finalists count here. The evening must work for all of them.' : 'Everyone who voted. ♛ marks a finalist. Green means all four finalists can make it.',
+      footerLine: voterCount + ' of ' + this.players.length + ' players have voted. ' + (closed ? 'Poll closed.' : 'Closes Sunday 8 November, 20:00.'),
+    };
+  }
+}
+</script>
+</body>
+</html>

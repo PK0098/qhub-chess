@@ -308,6 +308,40 @@ Your page: ${url}`,
     };
   },
 
+  // Finals night poll: everyone picks up to two evenings; the four finalists decide.
+  finalsPoll(env, { player, finalists, final, bronze, closesText }) {
+    const url = `${env.SITE_URL}/poll?t=${encodeURIComponent(player.token)}`;
+    const isFinalist = finalists.some((p) => p.id === player.id);
+    const match = (label, m) => `<tr><td style="padding:6px 0;width:110px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#e0552b;font-weight:700">${label}</td><td style="padding:6px 0"><strong>${esc(m.a)}</strong> <span style="color:#5c5548">vs</span> <strong>${esc(m.b)}</strong></td></tr>`;
+    return {
+      subject: `Finals night: pick your evening ♛`,
+      html: layout(`Finals night. Pick your evening.`, `
+        <p>Hi ${esc(first(player.name))}. The semi-finals are played. Time to crown a champion, and to do it together.</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;border-top:1px solid #1c1a17;border-bottom:1px solid #1c1a17">${match('Final', final)}${match('Bronze match', bronze)}</table>
+        <p style="margin:0 0 6px"><strong>The plan: one evening, week of 9 to 13 November.</strong></p>
+        <ul style="padding-left:20px;margin:0 0 14px">
+          <li style="margin:6px 0"><strong>20:00</strong> doors open at Q hub.</li>
+          <li style="margin:6px 0">The <strong>final</strong> and the <strong>bronze match</strong> are played first, best of 3, about an hour in total. Come and watch.</li>
+          <li style="margin:6px 0">Then a <strong>1-minute bullet round robin</strong> for everyone who's there. Fast, loud, no mercy.</li>
+          <li style="margin:6px 0">Extra boards for friendly games the rest of the night.</li>
+          <li style="margin:6px 0">Bring your own drinks and snacks. Share if you're feeling generous.</li>
+        </ul>
+        ${isFinalist
+          ? `<div style="border:2px solid #1c1a17;background:#e4f1e4;padding:12px 14px;margin:0 0 16px;box-shadow:4px 4px 0 #1c1a17"><strong>&#9819; You're playing that night, ${esc(first(player.name))}.</strong> The evening has to work for all four finalists, so your vote decides. Please answer today if you can.</div>`
+          : `<p>Everyone from the tournament is welcome, playing or watching. Pick the evenings you can make it and we'll go with the one that works for all four finalists and the most of you.</p>`}
+        <p>Tick <strong>up to two evenings</strong> on your personal poll page. The tally is live, you can change your mind until it closes.</p>
+        ${button(url, 'Pick your evenings')}
+        <p><strong>The poll closes ${esc(closesText)}.</strong> The evening is announced right after.</p>
+        <p>See you at the board.</p>`),
+      text: `Hi ${first(player.name)}. The semi-finals are played. Finals night: one evening in the week of 9 to 13 November.
+Final: ${final.a} vs ${final.b}
+Bronze match: ${bronze.a} vs ${bronze.b}
+20:00 doors open at Q hub. Final and bronze match first (about an hour), then a 1-minute bullet round robin for everyone, extra boards for friendly games, bring your own drinks and snacks. Everyone is welcome, playing or watching.
+${isFinalist ? 'You are playing that night: the evening has to work for all four finalists, so please answer today.\n' : ''}Pick up to two evenings: ${url}
+The poll closes ${closesText}.`,
+    };
+  },
+
   reported(env, { player, reporter, outcomeText, gameId }) {
     const url = gameLink(env, player.token, gameId);
     return {

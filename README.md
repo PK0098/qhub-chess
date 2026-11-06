@@ -30,7 +30,7 @@ Phase never changes by clock. The countdown is informational; the organizer deci
 
 ### API
 
-Public: `GET /api/state`, `GET /api/photo/:id`, `POST /api/register`, `GET /api/me?t=`, `POST /api/report`, `POST /api/confirm`.
+Public: `GET /api/state`, `GET /api/photo/:id`, `POST /api/register`, `GET /api/me?t=`, `POST /api/report`, `POST /api/confirm`, `GET|POST /api/poll` (finals night poll, token-gated; page `/poll?t=`, not linked from the site).
 Admin (`Authorization: Bearer <ADMIN_KEY>`): `GET /api/admin/overview`, `POST /api/admin/close`, `POST /api/admin/resolve`, `POST /api/admin/remove`, `POST /api/admin/test-email`.
 Emails and tokens never leave the server in public responses.
 
@@ -73,7 +73,7 @@ Local end-to-end run with mock data (no real emails: without `RESEND_API_KEY` in
 4. "Close registration" draws the groups and sends the pairing emails; the site shows two tables.
 5. Report and confirm from two player pages, or set results from the admin Games table. Semis, final, third place and the champion email follow automatically.
 
-Existing databases need `migrations/0002-groups.sql` once (`npx wrangler d1 execute anahit-chess --remote --file migrations/0002-groups.sql`).
+Existing databases need `migrations/0002-groups.sql` and `migrations/0003-poll.sql` once each (`npx wrangler d1 execute anahit-chess --remote --file migrations/0003-poll.sql`). The poll closes at `settings.poll_closes_at`; spec in `docs/superpowers/specs/2026-11-06-finals-night-poll-design.md`.
 
 ## Deploying
 
